@@ -11,6 +11,7 @@ namespace dimmer {
 		
 		template<typename T, size_t W, size_t H>
 		class matrix {
+		private:
 			std::shared_ptr<T> data;
 			std::function<size_t(size_t, size_t)> idx;
 		public:
@@ -105,7 +106,7 @@ namespace dimmer {
 		}
 		
 		template<typename T, size_t W, size_t M, size_t H>
-		matrix<T, W, H> operator*(const matrix<T,M,H> &a, const matrix<T,W,H> &b)
+		matrix<T, W, H> operator*(const matrix<T,M,H> &a, const matrix<T,W,M> &b)
 		{
 			matrix<T,W,H> out;
 			for (size_t i = 0; i < W; i++) {
@@ -119,8 +120,8 @@ namespace dimmer {
 			return out;
 		}
 		
-		template<typename T, typename F, size_t W, size_t H>
-		matrix<T,W,H> operator*(const matrix<T,W,H> &a, const F f)
+		template<typename T, size_t W, size_t H>
+		matrix<T,W,H> operator*(const matrix<T,W,H> &a, const T f)
 		{
 			matrix<T,W,H> out;
 			for (size_t i = 0; i < a.size(); i++) out(i) = a(i) * f;
@@ -150,16 +151,16 @@ namespace dimmer {
 			return a;
 		}
 		
-		template<typename T, typename F, size_t W, size_t H>
-		matrix<T,W,H> operator/(const matrix<T,W,H> &a, const F f)
+		template<typename T, size_t W, size_t H>
+		matrix<T,W,H> operator/(const matrix<T,W,H> &a, const T f)
 		{
 			matrix<T,W,H> out;
 			for (size_t i = 0; i < a.size(); i++) out(i) = a(i) / f;
 			return out;
 		}
 		
-		template<typename T, typename F, size_t W, size_t H>
-		matrix<T,W,H>& operator/=(const matrix<T,W,H> &a, const F f)
+		template<typename T, size_t W, size_t H>
+		matrix<T,W,H>& operator/=(const matrix<T,W,H> &a, const T f)
 		{
 			for (size_t i = 0; i < a.size(); i++) a(i) /= f;
 			return a;
