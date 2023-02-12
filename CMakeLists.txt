@@ -4,6 +4,8 @@ message("Generating project with target: ${target}")
 if("${target}" STREQUAL "arm64")
 	set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
 	set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
+	set(CMAKE_LIBRARY_PATH /usr/arm-linux-gnueabihf/lib;/usr/lib;/usr/lib32;/usr/lib64)
+	set(CMAKE_INCLUDE_PATH /usr/arm-linux-gnueabihf/include;/usr/include)
 	
 	set(CMAKE_SYSTEM_NAME Linux)
 elseif("${target}" STREQUAL "x64")
