@@ -53,7 +53,8 @@ void dimmer::logging::_log(std::string mod_name, dimmer::logging::log_level leve
 	strftime(date_time, 255, "%Y-%m-%d %H:%M:%S", &timeinfo);
 	
 	std::transform(mod_name.begin(), mod_name.end(), mod_name.begin(), static_cast<int (*)(int)>(&std::toupper));
-	std::string msg = std::format(fmt, args);
+	std::format_args fargs = std::make_format_args(args);
+	std::string msg = std::vformat(fmt, fargs);
 	std::string prefix = std::format("[{}][{}][{}] ", date_time, mod_name, level_names[level]);
 	
 	for (int i = 0; i < out_streams.size(); i++) *out_streams[i] << prefix << msg << std::endl;
