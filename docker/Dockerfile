@@ -13,4 +13,5 @@ RUN apt-get -y install binutils-arm-linux-gnueabihf
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install pkg-config-arm-linux-gnueabihf
 RUN apt-get -y install make
 RUN apt-get -y install cmake
-RUN apt-get -y install xorg-dev
+RUN apt-get -y install libglew-dev libglfw3-dev
+RUN apt-get -y install libfmt-dev

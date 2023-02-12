@@ -24,7 +24,11 @@ endif()
 
 cmake_minimum_required(VERSION 3.0.0)
 project(DimmerControllerFirmware)
-	set(CMAKE_CXX_STANDARD 23)
+	if("${target}" STREQUAL "win")
+		set(CMAKE_CXX_STANDARD 23)
+	else()
+		set(CMAKE_CXX_STANDARD 20)
+	endif()
 	
 	# find sources for main executable
 	file(GLOB MAIN_SOURCES src/firmware/*.cpp)

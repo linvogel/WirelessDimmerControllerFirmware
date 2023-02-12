@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include <varargs.h>
+#include <stdarg.h>
 
 #define fatal(...) dimmer::logging::_fatal(__VA_ARGS__)
 #define error(...) dimmer::logging::_error(__VA_ARGS__)
