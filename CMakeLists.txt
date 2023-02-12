@@ -7,6 +7,8 @@ if("${target}" STREQUAL "arm64")
 	set(CMAKE_LIBRARY_PATH /usr/arm-linux-gnueabihf/lib;/usr/lib;/usr/lib32;/usr/lib64)
 	set(CMAKE_INCLUDE_PATH /usr/arm-linux-gnueabihf/include;/usr/include)
 	
+	include_directories(BEFORE /usr/include /usr/arm-linux-gnueabihf/include)
+	
 	set(CMAKE_SYSTEM_NAME Linux)
 elseif("${target}" STREQUAL "x64")
 	set(CMAKE_C_COMPILER gcc)
@@ -28,12 +30,23 @@ project(DimmerControllerFirmware)
 	file(GLOB MAIN_SOURCES src/firmware/*.cpp)
 	include_directories(src/glew/include)
 	
-	add_subdirectory(glfw)
-	add_subdirectory(src/glew)
+	if("${target}" STREQUAL "win")
+		set(BUILD_SHARED_LIBS ON)
+		add_subdirectory(glfw)
+		add_subdirectory(src/glew)
+		add_definitions(-DGLFW_DLL)
+	endif()
 	foreach(SOURCE_FILE ${MAIN_SOURCES})
 		get_filename_component(FNAME ${SOURCE_FILE} NAME_WE)
 		add_definitions(-D_DIMMER_FILE_NAME_="${FNAME}")
 	endforeach()
 	
 	add_executable(firmware ${MAIN_SOURCES})
-	target_link_libraries(firmware PUBLIC glew32s glfw opengl32)
+	target_link_libraries(firmware PUBLIC glew32 glfw opengl32)
+	
+	if("${target}" STREQUAL "win")
+		add_custom_command(TARGET firmware POST_BUILD
+			COMMAND ${CMAKE_COMMAND} ARGS -E copy $<TARGET_FILE:glew32> $<TARGET_FILE_DIR:firmware>
+			COMMAND ${CMAKE_COMMAND} ARGS -E copy $<TARGET_FILE:glfw> $<TARGET_FILE_DIR:firmware>
+		)
+	endif()
