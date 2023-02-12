@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include <stdarg.h>
+#include <cstdarg>
 
 #define fatal(...) dimmer::logging::_fatal(__VA_ARGS__)
 #define error(...) dimmer::logging::_error(__VA_ARGS__)
@@ -35,12 +35,12 @@ namespace dimmer
 		
 		inline void log(log_level level, std::string &format, va_list args) { _log(_DIMMER_FILE_NAME_, level, format, args); }
 		
-		inline void _fatal(std::string msg, ...) { va_list args; __va_start(&args, msg); log(log_level::FATAL, msg, args); }
-		inline void _error(std::string msg, ...) { va_list args; __va_start(&args, msg); log(log_level::ERROR, msg, args); }
-		inline void _warn(std::string msg, ...) { va_list args; __va_start(&args, msg); log(log_level::WARNING, msg, args); }
-		inline void _info(std::string msg, ...) { va_list args; __va_start(&args, msg); log(log_level::INFO, msg, args); }
-		inline void _debug(std::string msg, ...) { va_list args; __va_start(&args, msg); log(log_level::DEBUG, msg, args); }
-		inline void _verbose(std::string msg, ...) { va_list args; __va_start(&args, msg); log(log_level::VERBOSE, msg, args); }
-		inline void _trace(std::string msg, ...) { va_list args; __va_start(&args, msg); log(log_level::TRACE, msg, args); }
+		inline void _fatal(std::string msg, ...) { va_list args; va_start(args, msg); log(log_level::FATAL, msg, args); }
+		inline void _error(std::string msg, ...) { va_list args; va_start(args, msg); log(log_level::ERROR, msg, args); }
+		inline void _warn(std::string msg, ...) { va_list args; va_start(args, msg); log(log_level::WARNING, msg, args); }
+		inline void _info(std::string msg, ...) { va_list args; va_start(args, msg); log(log_level::INFO, msg, args); }
+		inline void _debug(std::string msg, ...) { va_list args; va_start(args, msg); log(log_level::DEBUG, msg, args); }
+		inline void _verbose(std::string msg, ...) { va_list args; va_start(args, msg); log(log_level::VERBOSE, msg, args); }
+		inline void _trace(std::string msg, ...) { va_list args; va_start(args, msg); log(log_level::TRACE, msg, args); }
 	}
 } // namespace dimmer
