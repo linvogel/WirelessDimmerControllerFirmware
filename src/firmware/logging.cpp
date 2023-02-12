@@ -1,9 +1,9 @@
 #include "logging.hpp"
 
-#include <format>
 #include <vector>
 #include <ctime>
 #include <algorithm>
+#include <string.h>
 
 static std::vector<std::ostream*> out_streams;
 static std::vector<std::ostream*> err_streams;
@@ -53,12 +53,16 @@ void dimmer::logging::_log(std::string mod_name, dimmer::logging::log_level leve
 	strftime(date_time, 255, "%Y-%m-%d %H:%M:%S", &timeinfo);
 	
 	std::transform(mod_name.begin(), mod_name.end(), mod_name.begin(), static_cast<int (*)(int)>(&std::toupper));
-	std::format_args fargs = std::make_format_args(args);
-	std::string msg = std::vformat(fmt, fargs);
-	std::string prefix = std::format("[{}][{}][{}] ", date_time, mod_name, level_names[level]);
+	// if this is not enough, then i don't know anymore
+	char buf_msg[64*1024];
+	char buf_pre[256];
+	size_t printed_msg = snprintf(buf_msg, 64*1024, fmt.c_str(), args);
+	size_t printed_pre = snprintf(buf_pre, 256, "[%s][%s][%s] ", date_time, mod_name.c_str(), level_names[level].c_str());
+	if (printed_msg <= 0 || printed_msg >= 64*1024) error("Log message exceeded 64KB! Please enuse that log messages are strictly smaller in size than 64KB!");
+	if (printed_pre <= 0 || printed_pre >= 256) fatal("failed to print prefix size!");
 	
-	for (int i = 0; i < out_streams.size(); i++) *out_streams[i] << prefix << msg << std::endl;
-	if (level <= dimmer::logging::WARNING) for (int i = 1; i < err_streams.size(); i++) *err_streams[i] << prefix << msg << std::endl;
+	for (int i = 0; i < out_streams.size(); i++) *out_streams[i] << buf_pre << buf_msg << std::endl;
+	if (level <= dimmer::logging::WARNING) for (int i = 1; i < err_streams.size(); i++) *err_streams[i] << buf_pre << buf_msg << std::endl;
 }
 
 bool dimmer::logging::register_log_level(int level, std::string name)
