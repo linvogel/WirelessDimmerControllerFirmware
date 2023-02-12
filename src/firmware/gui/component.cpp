@@ -26,3 +26,8 @@ void dimmer::gui::component::remove_child(dimmer::gui::component *comp)
 	}
 }
 
+void dimmer::gui::component::draw(dimmer::gui::renderer &renderer)
+{
+	
+}
+
