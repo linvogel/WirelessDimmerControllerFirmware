@@ -16,6 +16,7 @@ elseif("${target}" STREQUAL "x64")
 
 	set(CMAKE_SYSTEM_NAME Linux)
 elseif("${target}" STREQUAL "win")
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	
 	set(CMAKE_SYSTEM_NAME Windows)
 else()

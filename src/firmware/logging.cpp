@@ -47,10 +47,9 @@ void dimmer::logging::_log(std::string mod_name, dimmer::logging::log_level leve
 	if (level > current_level) return;
 	char date_time[256];
 	time_t raw_time;
-	struct tm timeinfo;
 	time(&raw_time);
-	localtime_s(&timeinfo, &raw_time);
-	strftime(date_time, 255, "%Y-%m-%d %H:%M:%S", &timeinfo);
+	struct tm *timeinfo = localtime(&raw_time);
+	strftime(date_time, 255, "%Y-%m-%d %H:%M:%S", timeinfo);
 	
 	std::transform(mod_name.begin(), mod_name.end(), mod_name.begin(), static_cast<int (*)(int)>(&std::toupper));
 	// if this is not enough, then i don't know anymore
