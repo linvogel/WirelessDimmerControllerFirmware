@@ -1,7 +1,26 @@
+set(target "win" CACHE STRING "Build target for the generated project. Possible is 'win','x64' and 'arm64'")
+message("Generating project with target: ${target}")
+
+if("${target}" STREQUAL "arm64")
+	set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+	set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
+	
+	set(CMAKE_SYSTEM_NAME Linux)
+elseif("${target}" STREQUAL "x64")
+	set(CMAKE_C_COMPILER gcc)
+	set(CMAKE_CXX_COMPILER g++)
+
+	set(CMAKE_SYSTEM_NAME Linux)
+elseif("${target}" STREQUAL "win")
+	
+	set(CMAKE_SYSTEM_NAME Windows)
+else()
+	message( FATAL_ERROR "invalid target '${target}'! Known targets are 'win', 'x64', 'arm64'.")
+endif()
+
 cmake_minimum_required(VERSION 3.0.0)
 project(DimmerControllerFirmware)
 	set(CMAKE_CXX_STANDARD 23)
-	
 	
 	# find sources for main executable
 	file(GLOB MAIN_SOURCES src/firmware/*.cpp)
