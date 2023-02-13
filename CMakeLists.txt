@@ -4,7 +4,7 @@ message("Generating project with target: ${target}")
 if("${target}" STREQUAL "arm64")
 	set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
 	set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
-	set(CMAKE_LIBRARY_PATH /usr/arm-linux-gnueabihf/lib;/usr/lib;/usr/lib32;/usr/lib64)
+	set(CMAKE_LIBRARY_PATH /workspace/arm-libs)
 	set(CMAKE_INCLUDE_PATH /usr/arm-linux-gnueabihf/include;/usr/include)
 	
 	include_directories(BEFORE /usr/include /usr/arm-linux-gnueabihf/include)
@@ -47,7 +47,13 @@ project(DimmerControllerFirmware)
 	endforeach()
 	
 	add_executable(firmware ${MAIN_SOURCES})
-	target_link_libraries(firmware PUBLIC glew32 glfw opengl32)
+
+	if("${target}" STREQUAL "arm64")
+		target_link_directories(firmware PUBLIC "./arm-libs/")
+		#	target_link_libraries(firmware PUBLIC X11)
+	endif()
+
+	#target_link_libraries(firmware PUBLIC GLEW glfw)
 	
 	if("${target}" STREQUAL "win")
 		add_custom_command(TARGET firmware POST_BUILD

@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <cstdlib>
+#include <memory>
 
 
 #include "../logging.hpp"
