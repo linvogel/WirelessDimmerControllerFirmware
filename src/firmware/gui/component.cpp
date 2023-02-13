@@ -1,22 +1,22 @@
 #include "component.hpp"
 #include <algorithm>
 
-dimmer::gui::component* dimmer::gui::component::get_parent()
+dim::gui::component* dim::gui::component::get_parent()
 {
 	return this->m_parent;
 }
 
-const std::vector<dimmer::gui::component*>& dimmer::gui::component::get_children()
+const std::vector<dim::gui::component*>& dim::gui::component::get_children()
 {
 	return this->m_children;
 }
 
-void dimmer::gui::component::add(dimmer::gui::component *comp)
+void dim::gui::component::add(dim::gui::component *comp)
 {
 	this->m_children.push_back(comp);
 }
 
-void dimmer::gui::component::remove_child(dimmer::gui::component *comp)
+void dim::gui::component::remove_child(dim::gui::component *comp)
 {
 	// go through all children backwards and remove any that are equal to the input.
 	for (int64_t i = this->m_children.size()-1; i >= 0; i--) {
@@ -26,8 +26,12 @@ void dimmer::gui::component::remove_child(dimmer::gui::component *comp)
 	}
 }
 
-void dimmer::gui::component::draw(dimmer::gui::renderer &renderer)
+void dim::gui::component::draw(dim::gui::renderer &renderer)
 {
+	this->draw_component(renderer);
 	
+	for (dim::gui::component* comp : this->m_children) {
+		comp->draw(renderer);
+	}
 }
 

@@ -3,7 +3,7 @@
 #include "../math/matrix.hpp"
 
 
-namespace dimmer {
+namespace dim {
 	namespace gui {
 		class point {
 		private:

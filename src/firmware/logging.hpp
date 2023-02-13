@@ -4,17 +4,16 @@
 #include <string>
 #include <cstdarg>
 
-#define fatal(...) dimmer::logging::_fatal(__VA_ARGS__)
-#define error(...) dimmer::logging::_error(__VA_ARGS__)
-#define warn(...) dimmer::logging::_warn(__VA_ARGS__)
-#define info(...) dimmer::logging::_info(__VA_ARGS__)
-#define debug(...) dimmer::logging::_debug(__VA_ARGS__)
-#define verbose(...) dimmer::logging::_verbose(__VA_ARGS__)
-#define trace(...) dimmer::logging::_trace(__VA_ARGS__)
+#define fatal(...) dim::log::_fatal(__VA_ARGS__)
+#define error(...) dim::log::_error(__VA_ARGS__)
+#define warn(...) dim::log::_warn(__VA_ARGS__)
+#define info(...) dim::log::_info(__VA_ARGS__)
+#define debug(...) dim::log::_debug(__VA_ARGS__)
+#define verbose(...) dim::log::_verbose(__VA_ARGS__)
+#define trace(...) dim::log::_trace(__VA_ARGS__)
 
-namespace dimmer
-{
-	namespace logging {
+namespace dim{
+	namespace log {
 		enum log_level {
 			FATAL=0,
 			ERROR=10,

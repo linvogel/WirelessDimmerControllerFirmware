@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace dimmer {
+namespace dim {
 	namespace event {
 		
 		class event;

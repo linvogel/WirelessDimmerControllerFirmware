@@ -4,7 +4,7 @@
 
 #include "event_system.hpp"
 
-namespace dimmer {
+namespace dim {
 	namespace event {
 		
 		class event {

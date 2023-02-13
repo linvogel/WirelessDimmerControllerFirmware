@@ -4,7 +4,7 @@
 
 #include "renderer.hpp"
 
-namespace dimmer {
+namespace dim {
 	namespace gui {
 		
 		class component {
@@ -36,7 +36,14 @@ namespace dimmer {
 			 */
 			virtual void remove_child(component *comp);
 			
+			/**
+			 * @brief 
+			 * 
+			 * @param render 
+			 */
 			virtual void draw(renderer &render);
+			
+			virtual void draw_component(renderer &renderer) {};
 		};
 		
 	}

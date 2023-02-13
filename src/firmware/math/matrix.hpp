@@ -7,7 +7,7 @@
 
 #include "../logging.hpp"
 
-namespace dimmer {
+namespace dim {
 	namespace math {
 		
 		template<typename T, size_t W, size_t H>
@@ -16,7 +16,7 @@ namespace dimmer {
 			std::shared_ptr<T> data;
 			std::function<size_t(size_t, size_t)> idx;
 		public:
-			matrix() : data(new T[W*H], std::default_delete<T>()), idx([](size_t i, size_t j) { return j*W + i; }) { std::cout << "matrix initialized" << std::endl; }
+			matrix() : data(new T[W*H], std::default_delete<T>()), idx([](size_t i, size_t j) { return j*W + i; }) {}
 			matrix(std::initializer_list<T> l) : matrix() {
 				if (l.size() != W*H) {
 					fatal("Matrix initializer list differs in size from matrix it should initialize (initalizer list: {}, matrix: {})", l.size(), W*H);

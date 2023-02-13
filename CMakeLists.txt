@@ -22,8 +22,8 @@ project(DimmerControllerFirmware)
 	set(CMAKE_CXX_STANDARD 17)
 	
 	# find sources for main executable
-	file(GLOB MAIN_SOURCES src/firmware/*.cpp)
-	include_directories(src/glew/include glfw/include)
+	file(GLOB_RECURSE MAIN_SOURCES src/firmware/*.cpp)
+	include_directories(src/glew/include glfw/include src/firmware)
 	
 	if("${TARGET}" STREQUAL "local")
 		add_definitions(-DGLEW_BUILD -DGLEW_STATIC)

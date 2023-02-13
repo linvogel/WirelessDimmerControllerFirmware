@@ -10,39 +10,39 @@ static std::vector<std::ostream*> err_streams;
 
 static std::vector<std::string> level_names(128, std::string{});
 
-static dimmer::logging::log_level current_level = dimmer::logging::TRACE;
+static dim::log::log_level current_level = dim::log::TRACE;
 
-void dimmer::logging::init()
+void dim::log::init()
 {
 	
 	out_streams.push_back(&std::cout);
 	err_streams.push_back(&std::cerr);
 	
-	level_names[dimmer::logging::FATAL] = "FATAL";
-	level_names[dimmer::logging::ERROR] = "ERROR";
-	level_names[dimmer::logging::WARNING] = "WARNING";
-	level_names[dimmer::logging::INFO] = "INFO";
-	level_names[dimmer::logging::DEBUG] = "DEBUG";
-	level_names[dimmer::logging::VERBOSE] = "VERBOSE";
-	level_names[dimmer::logging::TRACE] = "TRACE";
+	level_names[dim::log::FATAL] = "FATAL";
+	level_names[dim::log::ERROR] = "ERROR";
+	level_names[dim::log::WARNING] = "WARNING";
+	level_names[dim::log::INFO] = "INFO";
+	level_names[dim::log::DEBUG] = "DEBUG";
+	level_names[dim::log::VERBOSE] = "VERBOSE";
+	level_names[dim::log::TRACE] = "TRACE";
 }
 
-void dimmer::logging::set_log_level(dimmer::logging::log_level level)
+void dim::log::set_log_level(dim::log::log_level level)
 {
 	current_level = level;
 }
 
-void dimmer::logging::add_out_stream(std::ostream out)
+void dim::log::add_out_stream(std::ostream out)
 {
 	out_streams.push_back(&out);
 }
 
-void dimmer::logging::add_err_stream(std::ostream out)
+void dim::log::add_err_stream(std::ostream out)
 {
 	err_streams.push_back(&out);
 }
 
-void dimmer::logging::_log(std::string mod_name, dimmer::logging::log_level level, std::string &fmt, va_list args)
+void dim::log::_log(std::string mod_name, dim::log::log_level level, std::string &fmt, va_list args)
 {
 	if (level > current_level) return;
 	char date_time[256];
@@ -61,10 +61,10 @@ void dimmer::logging::_log(std::string mod_name, dimmer::logging::log_level leve
 	if (printed_pre <= 0 || printed_pre >= 256) fatal("failed to print prefix size!");
 	
 	for (int i = 0; i < out_streams.size(); i++) *out_streams[i] << buf_pre << buf_msg << std::endl;
-	if (level <= dimmer::logging::WARNING) for (int i = 1; i < err_streams.size(); i++) *err_streams[i] << buf_pre << buf_msg << std::endl;
+	if (level <= dim::log::WARNING) for (int i = 1; i < err_streams.size(); i++) *err_streams[i] << buf_pre << buf_msg << std::endl;
 }
 
-bool dimmer::logging::register_log_level(int level, std::string name)
+bool dim::log::register_log_level(int level, std::string name)
 {
 	if (level_names[level].length() > 0) return false;
 	level_names[level] = name;

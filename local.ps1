@@ -1,11 +1,15 @@
 param(
-	[Parameter()][Switch]$clean
+	[Parameter()][Switch]$clean,
+	[Parameter()][Switch]$cmake
 )
 
 Set-Variable -Name BUILD_DIR -Value ./bin
 
 if ($clean) {
 	Remove-Item -Recurse $BUILD_DIR
+}
+
+if ($clean -or $cmake) {
 	cmake -S . -B $BUILD_DIR -DTARGET=local
 }
 
