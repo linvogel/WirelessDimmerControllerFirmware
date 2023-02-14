@@ -19,6 +19,7 @@ namespace dim {
 			GLFWwindow *m_window;
 			dim::math::vector4f m_bg_color;
 			dim::math::vector4f m_fg_color;
+			
 		public:
 			/**
 			 * @brief Construct a new window object. This instance must be the only one in this process!

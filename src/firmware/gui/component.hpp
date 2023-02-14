@@ -2,17 +2,29 @@
 
 #include <vector>
 
+#include "../math/matrix.hpp"
 #include "renderer.hpp"
 
 namespace dim {
 	namespace gui {
 		
+		class renderer; // circular dependency resolution
+		class shape2;
+		
 		class component {
 			component *m_parent;
 			std::vector<component*> m_children;
 			
+			dim::math::vector2f m_position;
+			dim::math::vector2f m_scale;
+			float m_angle;
+			
+		protected:
+			std::vector<dim::gui::shape2*> m_shapes;
+			
 		public:
-			component() = default;
+			component(dim::math::vector2f pos, dim::math::vector2f scale, float angle);
+			component(float x, float y, float sx, float sy, float angle) : component({x, y}, {sx, sy}, angle) {}
 			~component() = default;
 			
 			virtual component* get_parent();
@@ -41,7 +53,7 @@ namespace dim {
 			 * 
 			 * @param render 
 			 */
-			virtual void draw(renderer &render);
+			virtual void draw(renderer &render) final;
 			
 			virtual void draw_component(renderer &renderer) {};
 		};

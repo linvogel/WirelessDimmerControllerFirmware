@@ -7,6 +7,10 @@
 
 #include "../logging.hpp"
 
+// although this does not quite fit here: since this is the main math file of the firmware
+const double PI = 3.14159265358979323846;
+const double PI2 = 2*PI;
+
 namespace dim {
 	namespace math {
 		
@@ -31,6 +35,7 @@ namespace dim {
 			size_t cols() const { return W; }
 			size_t rows() const { return H; }
 			size_t size() const { return W*H; }
+			T* get_data() const { return this->data.get(); }
 			
 			T& operator()(size_t i, size_t j) const {
 				// runtime checks to prevent segmentation faults

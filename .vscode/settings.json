@@ -1,7 +1,8 @@
 {
 	"C_Cpp.default.includePath": [
 		"glfw/include",
-		"src/glew/include"
+		"src/glew/include",
+		"src/firmware"
 	],
 	"C_Cpp.default.defines": [
 		"_DIMMER_FILE_NAME_=\"MeaningfulFilename\""

@@ -6,7 +6,7 @@ param(
 Set-Variable -Name BUILD_DIR -Value ./bin
 
 if ($clean) {
-	Remove-Item -Recurse $BUILD_DIR
+	Remove-Item -Recurse -Path "$BUILD_DIR\*"
 }
 
 if ($clean -or $cmake) {

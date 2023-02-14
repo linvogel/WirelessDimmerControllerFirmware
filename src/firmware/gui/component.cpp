@@ -1,6 +1,11 @@
 #include "component.hpp"
 #include <algorithm>
 
+dim::gui::component::component(dim::math::vector2f pos, dim::math::vector2f scale, float angle)
+{
+	
+}
+
 dim::gui::component* dim::gui::component::get_parent()
 {
 	return this->m_parent;
@@ -28,10 +33,14 @@ void dim::gui::component::remove_child(dim::gui::component *comp)
 
 void dim::gui::component::draw(dim::gui::renderer &renderer)
 {
-	this->draw_component(renderer);
+	renderer.push();
+	renderer.transform(this->m_position, this->m_angle, this->m_scale);
 	
+	this->draw_component(renderer);
 	for (dim::gui::component* comp : this->m_children) {
 		comp->draw(renderer);
 	}
+	
+	renderer.pop();
 }
 
