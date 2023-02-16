@@ -10,7 +10,6 @@
 
 #include "gui/window.hpp"
 
-
 int main()
 {
 	dim::log::init();
@@ -29,14 +28,16 @@ int main()
 	 */
 	
 	dim::gui::window window("Dimmer Controller", 800, 480);
-	dim::gui::renderer renderer(window.get_window());
+	dim::gui::renderer &renderer = window.get_renderer();
 	
 	renderer.set_swap_interval(1);
 	
 	while (!window.shoud_close()) {
+		trace("Render cycle...");
 		renderer.wait(0.25);
+		renderer.clear();
 		
-		//window.draw(renderer);
+		window.draw(renderer);
 		
 		renderer.swap();
 	}

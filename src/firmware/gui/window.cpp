@@ -2,7 +2,7 @@
 #include "../errors.hpp"
 
 dim::gui::window::window(std::string name, int width, int height)
-	: component(0, 0, 1, 1, 0)
+	: component(0.0, 0.0, 1.0, 1.0, 0.0)
 {
 	info("Creating window...");
 	debug("Initializing GLFW...");
@@ -20,17 +20,8 @@ dim::gui::window::window(std::string name, int width, int height)
 	}
 	verbose("GLFWwindow constructed successfully.");
 	
-	verbose("Making context current");
-	glfwMakeContextCurrent(this->m_window);
-	trace("Context made current, setting general hints...");
-	glOrtho(0, 800, 480, 0, -1, 1);
-		
-	debug("Initializing GLEW...");
-	if (glewInit() != GLEW_OK) {
-		fatal("GLEW could not be initialized.");
-		exit(dim::GLEW_INIT_FAIL);
-	}
-	verbose("GLEW initialized successfully!");
+	verbose("Creating renderer object");
+	this->m_renderer = renderer(this->m_window);
 	
 	// setup colors
 	// TODO: this should be read from the configuration
@@ -39,12 +30,9 @@ dim::gui::window::window(std::string name, int width, int height)
 	
 	this->m_shapes = std::vector<dim::gui::shape2*>();
 	
-	this->m_shapes.push_back(nullptr);
-	this->m_shapes.push_back(nullptr);
-	this->m_shapes.push_back(nullptr);
-	this->m_shapes.back() = new dim::gui::triang2({10, 10}, {10, 100}, {100, 10});
-	this->m_shapes.back() = new dim::gui::quad2({200, 10}, {300, 10}, {300, 100}, {200, 100});
-	this->m_shapes.back() = new dim::gui::circle2(300, 300, 100);
+	this->m_shapes.push_back(new dim::gui::triang2(this->m_renderer, {100, 100}, {100, 200}, {200, 100}));
+	this->m_shapes.push_back(new dim::gui::quad2(this->m_renderer, {600, 100}, {700, 100}, {700, 200}, {600, 200}));
+	this->m_shapes.push_back(new dim::gui::circle2(this->m_renderer, 400, 300, 50));
 }
 
 dim::gui::window::~window()
@@ -57,11 +45,9 @@ dim::gui::window::~window()
 
 void dim::gui::window::draw_component(dim::gui::renderer &renderer)
 {
-	glColor3f(1, 0, 0);
+	
 	renderer.draw_shape(this->m_shapes[0]);
-	glColor3f(0, 1, 0);
 	renderer.draw_shape(this->m_shapes[1]);
-	glColor3f(0, 0, 1);
 	renderer.draw_shape(this->m_shapes[2]);
 }
 

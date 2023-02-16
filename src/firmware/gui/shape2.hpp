@@ -22,12 +22,10 @@ namespace dim {
 			unsigned int m_buffer;
 			float* m_data;
 			
-			
 		public:
-			shape2();
-			shape2(size_t size, float *positions);
-			shape2(size_t size, std::initializer_list<float>);
-			shape2(size_t size) : shape2(size, nullptr) {}
+			shape2(renderer &renderer, size_t size, float *positions);
+			shape2(renderer &renderer, size_t size, std::initializer_list<float>);
+			shape2(renderer &renderer, size_t size) : shape2(renderer, size, nullptr) {}
 			
 			~shape2();
 			
@@ -38,7 +36,7 @@ namespace dim {
 			 * @param size the number of elements in the data
 			 * @param buffer the data
 			 */
-			virtual void update_buffer(size_t size, float* buffer);
+			virtual void update_buffer(renderer &renderer, size_t size, float* buffer);
 			
 			/**
 			 * @brief Update this buffer under the assumption that the size has remained the same.
@@ -46,7 +44,7 @@ namespace dim {
 			 * to write to can be queried by @link size() @endlink
 			 * 
 			 */
-			virtual void update_buffer() { update_buffer(this->m_nElements, this->m_data); }
+			virtual void update_buffer(renderer &renderer) { update_buffer(renderer, this->m_nElements, this->m_data); }
 			
 			/**
 			 * @brief Get a pointer to the data. This pointer should NEVER be stored anywhere
@@ -67,29 +65,29 @@ namespace dim {
 		
 		class line2 : public virtual shape2 {
 		public:
-			line2(std::initializer_list<float> values): shape2(4, values) {}
-			line2(float x1, float y1, float x2, float y2);
-			line2(dim::math::vector2f a, dim::math::vector2f b);
+			line2(renderer &renderer, std::initializer_list<float> values): shape2(renderer, 4, values) {}
+			line2(renderer &renderer, float x1, float y1, float x2, float y2);
+			line2(renderer &renderer, dim::math::vector2f a, dim::math::vector2f b);
 		};
 		
 		class triang2 : public virtual shape2 {
 		public:
-			triang2(std::initializer_list<float> values): shape2(6, values) {}
-			triang2(float x1, float y1, float x2, float y2, float x3, float y3);
-			triang2(dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c);
+			triang2(renderer &renderer, std::initializer_list<float> values): shape2(renderer, 6, values) {}
+			triang2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3);
+			triang2(renderer &renderer, dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c);
 		};
 		
 		class quad2 : public virtual shape2 {
 		public:
-			quad2(std::initializer_list<float> values): shape2(8, values) {}
-			quad2(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
-			quad2(dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c, dim::math::vector2f d);
+			quad2(renderer &renderer, std::initializer_list<float> values): shape2(renderer, 8, values) {}
+			quad2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
+			quad2(renderer &renderer, dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c, dim::math::vector2f d);
 		};
 		
 		class circle2 : public virtual shape2 {
 		public:
-			circle2(float x, float y, float r);
-			circle2(dim::math::vector2f pos, float r) : circle2(pos(0), pos(1), r) {}
+			circle2(renderer &renderer, float x, float y, float r);
+			circle2(renderer &renderer, dim::math::vector2f pos, float r) : circle2(renderer, pos(0), pos(1), r) {}
 		};
 		
 	}	

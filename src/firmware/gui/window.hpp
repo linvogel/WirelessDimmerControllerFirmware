@@ -17,6 +17,7 @@ namespace dim {
 		class window : public virtual component {
 		private:
 			GLFWwindow *m_window;
+			renderer m_renderer;
 			dim::math::vector4f m_bg_color;
 			dim::math::vector4f m_fg_color;
 			
@@ -34,6 +35,7 @@ namespace dim {
 			virtual void draw_component(renderer &renderer);
 			
 			GLFWwindow *get_window() { return this->m_window; };
+			renderer &get_renderer() { return this->m_renderer; };
 			int shoud_close();
 		};
 		

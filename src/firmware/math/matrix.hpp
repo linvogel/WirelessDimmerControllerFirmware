@@ -4,8 +4,15 @@
 #include <cstdlib>
 #include <memory>
 
-
 #include "../logging.hpp"
+
+#define debug_mat4(mat)\
+debug("Matrix " #mat ":");\
+debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,0), mat(1,0), mat(2,0), mat(3,0));\
+debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,1), mat(1,1), mat(2,1), mat(3,1));\
+debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,2), mat(1,2), mat(2,2), mat(3,2));\
+debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,3), mat(1,3), mat(2,3), mat(3,3));
+
 
 // although this does not quite fit here: since this is the main math file of the firmware
 const double PI = 3.14159265358979323846;
@@ -17,44 +24,54 @@ namespace dim {
 		template<typename T, size_t W, size_t H>
 		class matrix {
 		private:
-			std::shared_ptr<T> data;
+			uint8_t m_data[W*H * sizeof(T)];
 			std::function<size_t(size_t, size_t)> idx;
 		public:
-			matrix() : data(new T[W*H], std::default_delete<T>()), idx([](size_t i, size_t j) { return j*W + i; }) {}
+			matrix() : idx([](size_t i, size_t j) { return j*W + i; }) {}
 			matrix(std::initializer_list<T> l) : matrix() {
 				if (l.size() != W*H) {
-					fatal("Matrix initializer list differs in size from matrix it should initialize (initalizer list: {}, matrix: {})", l.size(), W*H);
+					fatal("Matrix initializer list differs in size from matrix it should initialize (initalizer list: %ld, matrix: %ld)", l.size(), W*H);
 					throw "matrix error: invalid initializer list";
 				}
 				// copy all elements from the initializer list to the matrix data
 				size_t i = 0;
-				for (auto it = l.begin(); it != l.end(); it++) this->data.get()[i++] = *it;
+				for (auto it = l.begin(); it != l.end(); it++) ((T*)(this->m_data))[i++] = *it;
 			}
-			~matrix() {}
 			
 			size_t cols() const { return W; }
 			size_t rows() const { return H; }
 			size_t size() const { return W*H; }
-			T* get_data() const { return this->data.get(); }
+			T* get_data() const { return (T*)this->m_data; }
+			
+			static matrix identity()
+			{
+				matrix out;
+				for (size_t i = 0; i < W; i++) {
+					for (size_t j = 0; j < H; j++) {
+						out(i,j) = (i == j) ? (T)1 : (T)0;
+					}
+				}
+				return out;
+			}
 			
 			T& operator()(size_t i, size_t j) const {
 				// runtime checks to prevent segmentation faults
 				if (i >= W || j >= H) {
-					fatal("Matrix indices out of bounds! Size id {}x{} and index was {},{}!", W, H, i, j);
+					fatal("Matrix indices out of bounds! Size id %ldx%ld and index was %ld,%ld!", W, H, i, j);
 					throw "matrix error: index out of bounds";
 				}
 				
-				return this->data.get()[idx(i,j)];
+				return ((T*)(this->m_data))[idx(i,j)];
 			}
 			
 			T& operator()(size_t i) const {
 				// runtime checks to prevent segmentation faults
 				if (i >= W*H) {
-					fatal("Matrix index out of bounds! Size is {} and index was {}!", W*H, i);
+					fatal("Matrix index out of bounds! Size is %ld and index was %ld!", W*H, i);
 					throw "matrix error: index out of bounds";
 				}
 				
-				return this->data.get()[i];
+				return ((T*)(this->m_data))[i];
 			}
 			
 			T squared_length(const matrix<T,1,H> &v) {
