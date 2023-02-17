@@ -40,6 +40,9 @@ dim::gui::renderer::renderer(GLFWwindow *window)
 	this->m_current_program = this->m_base_program;
 	GL_CALL(glUseProgram(this->m_current_program));
 	
+	
+    GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    GL_CALL(glEnable( GL_BLEND ));
 	GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
@@ -268,6 +271,17 @@ void dim::gui::renderer::draw_shape(dim::gui::shape2 *shape)
 		error("cannot render buffer, buffer not initialized on gpu!");
 		return;
 	}
+	
+	int location = glGetUniformLocation(this->m_current_program, "u_corner_radius");
+	glUniform1f(location, shape->m_corner_radius);
+	location = glGetUniformLocation(this->m_current_program, "u_bounds");
+	glUniform4f(location, shape->m_bounds.x, shape->m_bounds.y, shape->m_bounds.w, shape->m_bounds.h);
+	location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness");
+	glUniform1f(location, shape->m_edge_smoothness);
+	location = glGetUniformLocation(this->m_current_program, "u_stroke_weight");
+	glUniform1f(location, shape->m_stroke_weight);
+	location = glGetUniformLocation(this->m_current_program, "u_stroke_color");
+	glUniform4fv(location, 1, shape->m_stroke_color.get_data());
 	
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
 	GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data(), GL_STREAM_DRAW));

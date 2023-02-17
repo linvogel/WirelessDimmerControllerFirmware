@@ -7,7 +7,6 @@
 
 #include "../logging.hpp"
 
-
 dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
 {
 	debug("creating shape2...");
@@ -24,6 +23,23 @@ dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
 	if (data) std::memcpy(this->m_data, data, this->m_nElements * sizeof(float));
 	
 	this->m_buffer = renderer.create_2d_float_vertex_buffer_simple(this->m_nElements, this->m_data);
+	
+	this->m_corner_radius = 0;
+	
+	// Note: this only works for 2d vertex buffer with only the position attribute
+	this->m_bounds = {800, 480, 0, 0};
+	for (size_t i = 0; i < this->m_nElements; i+= 2) {
+		this->m_bounds.x = std::min(this->m_bounds.x, this->m_data[i]);
+		this->m_bounds.y = std::min(this->m_bounds.y, this->m_data[i+1]);
+		this->m_bounds.w = std::max(this->m_bounds.w, this->m_data[i]);
+		this->m_bounds.h = std::max(this->m_bounds.h, this->m_data[i+1]);
+	}
+	this->m_bounds.w -= this->m_bounds.x;
+	this->m_bounds.h -= this->m_bounds.y;
+	
+	this->m_edge_smoothness = 1.0f;
+	this->m_stroke_weight = 0.0f;
+	this->m_stroke_color = dim::math::vector4f({0.0, 0.0, 1.0, 1.0});
 	
 	verbose("shape2 created");
 }
@@ -59,14 +75,26 @@ void dim::gui::shape2::update_buffer(dim::gui::renderer &renderer, size_t size, 
 		void* ret = std::realloc(this->m_data, size * sizeof(float));
 		if (!ret) {
 			error("Failed to reallocate CPU side of buffer");
+			return;
 		} else {
 			this->m_nElements = size;
+			this->m_data = (float*)ret;
 		}
 	}
 	
 	if (this->m_data != data) std::memcpy(this->m_data, data, this->m_nElements * sizeof(float));
 	
 	renderer.update_buffer(this->m_buffer, this->m_nElements, this->m_data);
+	
+	this->m_bounds = {800, 480, 0, 0};
+	for (size_t i = 0; i < this->m_nElements; i+= 2) {
+		this->m_bounds.x = std::min(this->m_bounds.x, this->m_data[i]);
+		this->m_bounds.y = std::min(this->m_bounds.y, this->m_data[i+1]);
+		this->m_bounds.w = std::max(this->m_bounds.w, this->m_data[i]);
+		this->m_bounds.h = std::max(this->m_bounds.h, this->m_data[i+1]);
+	}
+	this->m_bounds.w -= this->m_bounds.x;
+	this->m_bounds.h -= this->m_bounds.y;
 }
 
 
@@ -84,9 +112,11 @@ dim::gui::triang2::triang2(dim::gui::renderer &renderer, dim::math::vector2f a, 
 
 // quad 2
 dim::gui::quad2::quad2(dim::gui::renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
-	: shape2(renderer, 12, {x1, y1, x2, y2, x3, y3, x1, y1, x3, y3, x4, y4}) {}
+	: shape2(renderer, 12, {x1, y1, x2, y2, x3, y3, x1, y1, x3, y3, x4, y4}) {
+}
 dim::gui::quad2::quad2(dim::gui::renderer &renderer, dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c, dim::math::vector2f d)
-	: shape2(renderer, 12, { a(0), a(1), b(0), b(1), c(0), c(1), a(0), a(1), c(0), c(1), d(0), d(1) }) {}
+	: shape2(renderer, 12, { a(0), a(1), b(0), b(1), c(0), c(1), a(0), a(1), c(0), c(1), d(0), d(1) }) {
+}
 
 // circle 2
 dim::gui::circle2::circle2(dim::gui::renderer &renderer, float x, float y, float r) : shape2(renderer, 2*N_VERT_CIRCLE + 4)
@@ -115,4 +145,5 @@ dim::gui::circle2::circle2(dim::gui::renderer &renderer, float x, float y, float
 	this->m_data[2*N_VERT_CIRCLE + 2] = this->m_data[2];
 	this->m_data[2*N_VERT_CIRCLE + 3] = this->m_data[3];
 	
+	this->update_buffer(renderer);
 }

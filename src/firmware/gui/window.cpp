@@ -33,6 +33,9 @@ dim::gui::window::window(std::string name, int width, int height)
 	this->m_shapes.push_back(new dim::gui::triang2(this->m_renderer, {100, 100}, {100, 200}, {200, 100}));
 	this->m_shapes.push_back(new dim::gui::quad2(this->m_renderer, {600, 100}, {700, 100}, {700, 200}, {600, 200}));
 	this->m_shapes.push_back(new dim::gui::circle2(this->m_renderer, 400, 300, 50));
+	
+	this->m_shapes[1]->set_corner_radius(10.0);
+	this->m_shapes[1]->set_stroke_weight(2.0);
 }
 
 dim::gui::window::~window()

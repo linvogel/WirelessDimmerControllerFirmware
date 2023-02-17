@@ -11,6 +11,16 @@ namespace dim {
 		
 		class renderer;
 		
+		struct bounds {
+			float x;
+			float y;
+			float w;
+			float h;
+			
+			bounds() : x(0), y(0), w(1), h(1) {}
+			bounds(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {}
+		};
+		
 		/**
 		 * @brief Base class for shapes for the renderer
 		 * 
@@ -21,6 +31,12 @@ namespace dim {
 			size_t m_nElements;
 			unsigned int m_buffer;
 			float* m_data;
+			
+			bounds m_bounds;
+			float m_corner_radius;
+			float m_edge_smoothness;
+			float m_stroke_weight;
+			dim::math::vector4f m_stroke_color;
 			
 		public:
 			shape2(renderer &renderer, size_t size, float *positions);
@@ -60,6 +76,30 @@ namespace dim {
 			 * @return size_t numer of elements in this buffer
 			 */
 			virtual size_t size() { return this->m_nElements; }
+			
+			/**
+			 * @brief Set the corner radius of this shape. This is only recommended
+			 * for axis aligned quads for the time being.
+			 * 
+			 * @param corner_radius the corner radius in pixels
+			 */
+			virtual void set_corner_radius(float corner_radius) { this->m_corner_radius = corner_radius; }
+			
+			/**
+			 * @brief Set the stroke weight of this shape. This is only recommended
+			 * for axis aligned quads for the time being.
+			 * 
+			 * @param stroke_weight the stroke weight in pixels
+			 */
+			virtual void set_stroke_weight(float stroke_weight) { this->m_stroke_weight = stroke_weight; }
+			
+			/**
+			 * @brief Set the stroke color of this shape. This is only recommended
+			 * for axis aligned quads for the time being.
+			 *
+			 * @param stroke_color the stroke color as RGBA
+			 */
+			virtual void set_stroke_color(dim::math::vector4f stroke_color) { this->m_stroke_color = stroke_color; }
 		};
 		
 		
@@ -88,6 +128,8 @@ namespace dim {
 		public:
 			circle2(renderer &renderer, float x, float y, float r);
 			circle2(renderer &renderer, dim::math::vector2f pos, float r) : circle2(renderer, pos(0), pos(1), r) {}
+			
+			void set_corner_radius(float rad) override { this->m_corner_radius = 0; }
 		};
 		
 	}	
