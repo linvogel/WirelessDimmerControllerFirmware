@@ -2,6 +2,7 @@
 #include "../errors.hpp"
 
 #include <fstream>
+#include <cmath>
 
 #ifndef NDEBUG
 #define GL_CALL(x) \
@@ -34,12 +35,12 @@ dim::gui::renderer::renderer(GLFWwindow *window)
 	this->m_view_stack.reserve(128);
 	this->m_model_stack.reserve(128);
 	
-	this->reset();
-	
+	info("Loading shaders...");
 	this->m_base_program = this->createShader("shaders/basic_vertex.glsl", "shaders/basic_fragment.glsl");
 	this->m_current_program = this->m_base_program;
 	GL_CALL(glUseProgram(this->m_current_program));
 	
+	this->reset();
 	
     GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     GL_CALL(glEnable( GL_BLEND ));

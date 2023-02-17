@@ -23,6 +23,9 @@ dim::gui::window::window(std::string name, int width, int height)
 	verbose("Creating renderer object");
 	this->m_renderer = renderer(this->m_window);
 	
+	// setup input handling
+	this->m_input_ctrl = std::make_shared<dim::in::input_controller>(this->m_window);
+	
 	// setup colors
 	// TODO: this should be read from the configuration
 	this->m_bg_color = dim::math::vector4f({0.0f, 0.0f, 0.3f, 0.7f});
@@ -35,7 +38,7 @@ dim::gui::window::window(std::string name, int width, int height)
 	this->m_shapes.push_back(new dim::gui::circle2(this->m_renderer, 400, 300, 50));
 	
 	this->m_shapes[1]->set_corner_radius(10.0);
-	this->m_shapes[1]->set_stroke_weight(2.0);
+	this->m_shapes[1]->set_stroke_weight(5.0);
 }
 
 dim::gui::window::~window()

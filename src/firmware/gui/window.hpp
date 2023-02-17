@@ -2,6 +2,7 @@
 
 #include "component.hpp"
 #include "../math/matrix.hpp"
+#include "../input/input_controller.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -18,6 +19,8 @@ namespace dim {
 		private:
 			GLFWwindow *m_window;
 			renderer m_renderer;
+			std::shared_ptr<dim::in::input_controller> m_input_ctrl;
+			
 			dim::math::vector4f m_bg_color;
 			dim::math::vector4f m_fg_color;
 			
