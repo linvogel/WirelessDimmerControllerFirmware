@@ -37,6 +37,7 @@ namespace dim {
 			float m_edge_smoothness;
 			float m_stroke_weight;
 			dim::math::vector4f m_stroke_color;
+			dim::math::vector4f m_background_color;
 			
 		public:
 			shape2(renderer &renderer, size_t size, float *positions);
@@ -100,6 +101,27 @@ namespace dim {
 			 * @param stroke_color the stroke color as RGBA
 			 */
 			virtual void set_stroke_color(dim::math::vector4f stroke_color) { this->m_stroke_color = stroke_color; }
+			
+			/**
+			 * @brief Set the background color of this shape.
+			 * 
+			 * @param bg_color the background color as RGBA
+			 */
+			virtual void set_background_color(dim::math::vector4f bg_color) { this->m_background_color = bg_color; }
+			
+			/**
+			 * @brief Get the bounds of this shape
+			 * 
+			 * @return vector4f containing the bounds of this shape
+			 */
+			virtual dim::math::vector4f get_bounds() final { return dim::math::vector4f({this->m_bounds.x, this->m_bounds.y, this->m_bounds.w, this->m_bounds.h}); }
+			
+			/**
+			 * @brief Get the size of this shape
+			 * 
+			 * @return vector2f containing the size of this shape
+			 */
+			virtual dim::math::vector2f get_size() final { return dim::math::vector2f({this->m_bounds.w, this->m_bounds.h}); }
 		};
 		
 		

@@ -39,7 +39,8 @@ dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
 	
 	this->m_edge_smoothness = 1.0f;
 	this->m_stroke_weight = 0.0f;
-	this->m_stroke_color = dim::math::vector4f({0.0, 0.0, 1.0, 1.0});
+	this->m_stroke_color = {0.0f, 0.0f, 1.0f, 1.0f};
+	this->m_background_color = {0.0f, 0.0f, 0.0f, 0.0f};
 	
 	verbose("shape2 created");
 }

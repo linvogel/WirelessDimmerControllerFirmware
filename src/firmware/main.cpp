@@ -27,19 +27,25 @@ int main()
 	 * 
 	 */
 	
+	// create window object and prepare interfaces
 	dim::gui::window window("Dimmer Controller", 800, 480);
 	dim::gui::renderer &renderer = window.get_renderer();
+	dim::in::input_controller &input_controller = window.get_input_ctrl();
 	
 	renderer.set_swap_interval(1);
 	
 	while (!window.shoud_close()) {
 		trace("Render cycle...");
 		renderer.wait(0.25);
+		trace("Waited...");
 		renderer.clear();
+		trace("Cleared...");
 		
 		window.draw(renderer);
+		trace("Drawn...");
 		
 		renderer.swap();
+		trace("Swapped...");
 	}
 	
 	return dim::OK;

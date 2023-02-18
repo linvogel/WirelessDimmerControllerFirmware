@@ -283,6 +283,8 @@ void dim::gui::renderer::draw_shape(dim::gui::shape2 *shape)
 	glUniform1f(location, shape->m_stroke_weight);
 	location = glGetUniformLocation(this->m_current_program, "u_stroke_color");
 	glUniform4fv(location, 1, shape->m_stroke_color.get_data());
+	location = glGetUniformLocation(this->m_current_program, "u_bg_color");
+	glUniform4fv(location, 1, shape->m_background_color.get_data());
 	
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
 	GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data(), GL_STREAM_DRAW));

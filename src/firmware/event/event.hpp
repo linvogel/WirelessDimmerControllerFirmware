@@ -2,23 +2,26 @@
 
 #include <string>
 
-#include "event_system.hpp"
+#include "../math/matrix.hpp"
 
 namespace dim {
+	namespace gui {
+		class component;
+	}
 	namespace event {
 		
 		class event {
-			std::string m_name;
-			event_system &evt_system;
-			
+		protected:
+			dim::math::vector2f m_location;
 			
 		public:
-			event(std::string evt_name);
+			event() { this->m_location = {0, 0}; }
+			event(dim::math::vector2f location);
 			virtual ~event();
 			
-			virtual std::string get_name();
-			virtual void skip() final;
-			virtual void consume() final;
+			virtual dim::math::vector2f& get_location() final;
+			
+			virtual void handle_for_component(dim::gui::component* comp);
 		};
 		
 	}

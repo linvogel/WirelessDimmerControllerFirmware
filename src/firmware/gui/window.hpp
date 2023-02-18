@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
+#include <memory>
 
 namespace dim {
 	namespace gui {
@@ -39,7 +40,10 @@ namespace dim {
 			
 			GLFWwindow *get_window() { return this->m_window; };
 			renderer &get_renderer() { return this->m_renderer; };
+			dim::in::input_controller &get_input_ctrl() { return *(this->m_input_ctrl); };
 			int shoud_close();
+			
+			virtual void handle_click_event(dim::event::click_event event) override;
 		};
 		
 	}

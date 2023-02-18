@@ -13,6 +13,7 @@ dim::gui::window::window(std::string name, int width, int height)
 	verbose("GLFW initialized successfully!");
 	
 	debug("Constructing GLFWwindow...");
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	this->m_window = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
 	if (!this->m_window) {
 		fatal("Unable to create GLFWwindow!");
@@ -24,21 +25,16 @@ dim::gui::window::window(std::string name, int width, int height)
 	this->m_renderer = renderer(this->m_window);
 	
 	// setup input handling
-	this->m_input_ctrl = std::make_shared<dim::in::input_controller>(this->m_window);
+	this->m_input_ctrl = std::make_shared<dim::in::input_controller>(this->m_window, this);
 	
 	// setup colors
 	// TODO: this should be read from the configuration
-	this->m_bg_color = dim::math::vector4f({0.0f, 0.0f, 0.3f, 0.7f});
-	this->m_fg_color = dim::math::vector4f({0.0f, 0.0f, 0.7f, 1.0f});
+	this->m_bg_color = dim::math::vector4f({0.0f, 0.145f, 0.274f, 1.0f});
+	this->m_fg_color = dim::math::vector4f({0.7f, 0.7f, 0.1f, 1.0f});
 	
-	this->m_shapes = std::vector<dim::gui::shape2*>();
-	
-	this->m_shapes.push_back(new dim::gui::triang2(this->m_renderer, {100, 100}, {100, 200}, {200, 100}));
-	this->m_shapes.push_back(new dim::gui::quad2(this->m_renderer, {600, 100}, {700, 100}, {700, 200}, {600, 200}));
-	this->m_shapes.push_back(new dim::gui::circle2(this->m_renderer, 400, 300, 50));
-	
-	this->m_shapes[1]->set_corner_radius(10.0);
-	this->m_shapes[1]->set_stroke_weight(5.0);
+	this->m_shape = std::make_shared<quad2>(this->m_renderer, 0.0f, 0.0f, 800.0f, 0.0f, 800.0f, 480.0f, 0.0f, 480.0f);
+	this->m_size = this->m_shape->get_size();
+	this->m_shape->set_background_color(this->m_bg_color);
 }
 
 dim::gui::window::~window()
@@ -51,13 +47,15 @@ dim::gui::window::~window()
 
 void dim::gui::window::draw_component(dim::gui::renderer &renderer)
 {
-	
-	renderer.draw_shape(this->m_shapes[0]);
-	renderer.draw_shape(this->m_shapes[1]);
-	renderer.draw_shape(this->m_shapes[2]);
+	if (this->m_shape.get()) renderer.draw_shape(this->m_shape.get());
 }
 
 int dim::gui::window::shoud_close()
 {
 	return glfwWindowShouldClose(this->m_window);
+}
+
+void dim::gui::window::handle_click_event(dim::event::click_event event)
+{
+	debug("Window received click event at (%f,%f)", event.get_location()(0), event.get_location()(1));
 }

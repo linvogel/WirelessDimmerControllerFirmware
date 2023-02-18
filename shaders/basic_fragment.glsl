@@ -8,6 +8,7 @@ uniform float u_edge_smoothness;
 uniform float u_stroke_weight;
 uniform vec4 u_stroke_color;
 uniform vec4 u_bounds;
+uniform vec4 u_bg_color;
 
 void main()
 {
@@ -33,7 +34,11 @@ void main()
 	float alpha_edge_stroke = 0.0;
 	if (u_stroke_weight != 0.0) alpha_edge_stroke = 1.0 - clamp(((signed_distance * corner_size) - u_stroke_weight) / u_edge_smoothness, 0, 1);
 	
-	vec4 out_color = vec4(local_position.x / u_bounds.z, local_position.y / u_bounds.w, 0, 1.0); // TODO: sample texture/find background color
+	vec4 out_color = u_bg_color; 
+	if (u_bg_color.w == 0.0) {
+		// TODO: check  for texture
+		out_color = vec4(local_position.x / u_bounds.z, local_position.y / u_bounds.w, 0.0, 1.0);
+	}
 	out_color.xyz = out_color.xyz * (1.0 - alpha_edge_stroke) + u_stroke_color.xyz * u_stroke_color.w * alpha_edge_stroke;
 	
 	color = vec4(out_color.xyz, alpha_corner_radius);
