@@ -7,7 +7,7 @@
 using namespace dim::gui;
 
 
-dim::gui::window::window(std::string name, int width, int height)
+window::window(std::string name, int width, int height)
 	: component(0.0, 0.0, 1.0, 1.0, 0.0, (float)width, (float)height)
 {
 	info("Creating window...");
@@ -44,7 +44,7 @@ dim::gui::window::window(std::string name, int width, int height)
 	this->m_size = this->m_shape->get_size();
 }
 
-dim::gui::window::~window()
+window::~window()
 {
 	debug("Destroying GLFW window...");
 	glfwDestroyWindow(this->m_window);
@@ -52,14 +52,12 @@ dim::gui::window::~window()
 	glfwTerminate();
 }
 
-void dim::gui::window::draw_component(dim::gui::renderer &renderer)
+void window::draw_component(renderer &renderer)
 {
 	if (this->m_shape.get()) renderer.draw_shape(this->m_shape.get());
-	
-	renderer.draw_text_centered("hello, world", 400, 240, 50);
 }
 
-int dim::gui::window::shoud_close()
+int window::shoud_close()
 {
 	return glfwWindowShouldClose(this->m_window);
 }

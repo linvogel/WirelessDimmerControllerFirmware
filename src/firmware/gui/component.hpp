@@ -90,6 +90,7 @@ namespace dim {
 			virtual void set_shape(std::shared_ptr<shape2> shape) { this->m_shape = shape; }
 			virtual std::shared_ptr<shape2> get_shape() { return this->m_shape; }
 			
+			virtual vector2f get_position() { return this->m_position; }
 			virtual component* get_focussed() { return this->m_focussed; }
 			virtual void focus(component* comp) { this->m_focussed = comp; }
 			virtual bool hit(float local_x, float local_y); 

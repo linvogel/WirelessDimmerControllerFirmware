@@ -11,11 +11,10 @@ button::button(std::string text, std::function<void(void)> func, renderer &rende
 {
 	this->m_act_color = vector4f({0.0f, 0.218f, 0.411f, 1.0f});
 	this->m_shape = std::make_shared<quad2>(this->m_renderer, 0.0f, 0.0f, w, 0.0f, w, h, 0.0f, h);
-	this->m_shape->set_offset(x, y - (480 - h));
-	this->m_shape->set_background_color(this->m_bg_color);
-	this->m_shape->set_stroke_color(this->m_fg_color);
 	this->m_shape->set_corner_radius(5.0f);
 	this->m_shape->set_stroke_weight(2.0f);
+	this->m_shape->set_background_color(this->m_bg_color);
+	this->m_shape->set_stroke_color(this->m_fg_color);
 }
 
 void button::draw_component(renderer &renderer)
@@ -37,6 +36,6 @@ void button::onLeftMouseDown(float x, float y)
 void button::onLeftMouseUp(float x, float y)
 {
 	this->m_shape->set_background_color(this->m_bg_color);
-	if (this->m_position(0) <= x && this->m_position(1) <= y && this->m_position(0) + this->m_size(0) >= x && this->m_position(1) + this->m_size(1) >= y)
+	if (0 <= x && 0 <= y && this->m_size(0) >= x && this->m_size(1) >= y)
 		if (this->m_func) this->m_func();
 }

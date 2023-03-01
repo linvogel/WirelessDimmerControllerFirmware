@@ -11,6 +11,7 @@
 
 #include "gui/window.hpp"
 #include "gui/button.hpp"
+#include "gui/panel.hpp"
 
 using namespace dim::gui;
 using namespace dim::in;
@@ -38,24 +39,38 @@ int main()
 	renderer &renderer = window.get_renderer();
 	input_controller &input_controller = window.get_input_ctrl();
 	
-	button btn1("Button", []() {std::cout << "btn1 pressed" << std::endl;}, renderer, 100, 100, 150, 30);
+	vector4f cols[5] = {
+		{0.0f, 0.0f, 0.0f, 1.0f},
+		{1.0f, 0.0f, 0.0f, 1.0f},
+		{0.0f, 1.0f, 0.0f, 1.0f},
+		{0.0f, 0.0f, 1.0f, 1.0f},	
+		{1.0f, 1.0f, 1.0f, 1.0f}
+	};
+	int count = 0;
 	
-	window.add(&btn1);
+	button btn1("Button", [&]() { renderer.text_color = cols[count++ % 5]; }, renderer, 10, 10, 150, 30);
+	button btn2("Mute", []() { std::cout << "btn2 pressed" << std::endl; }, renderer, 10, 50, 150, 30);
+	
+	panel pnl1(renderer, 100, 100, 170, 90);
+	
+	window.add(&pnl1);
+	pnl1.add(&btn1);
+	pnl1.add(&btn2);
 	
 	renderer.set_swap_interval(1);
 	
 	while (!window.shoud_close()) {
-		trace("Render cycle...");
+		//trace("Render cycle...");
 		renderer.wait(0.25);
-		trace("Waited...");
+		//trace("Waited...");
 		renderer.clear();
-		trace("Cleared...");
+		//trace("Cleared...");
 		
 		window.draw(renderer);
-		trace("Drawn...");
+		//trace("Drawn...");
 		
 		renderer.swap();
-		trace("Swapped...");
+		//trace("Swapped...");
 	}
 	
 	return dim::OK;

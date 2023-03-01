@@ -32,7 +32,11 @@ const std::vector<component*>& component::get_children()
 
 void component::add(component *comp)
 {
+	comp->m_parent = this;
 	this->m_children.push_back(comp);
+	if (comp->m_shape.get()) {
+		comp->m_shape->set_offset(this->m_shape->get_offset()(0) + comp->m_position(0), this->m_shape->get_offset()(1) + comp->m_position(1) - this->m_size(1) + comp->m_size(1));
+	}
 }
 
 void component::remove_child(component *comp)

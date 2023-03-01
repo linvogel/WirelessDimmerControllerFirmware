@@ -59,6 +59,7 @@ namespace dim {
 			void reload_mvp();
 			
 		public:
+			vector4f text_color;
 			renderer() = default;
 			renderer(GLFWwindow *window);
 			~renderer();

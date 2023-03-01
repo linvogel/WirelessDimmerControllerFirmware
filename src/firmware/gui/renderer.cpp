@@ -31,6 +31,8 @@ renderer::renderer(GLFWwindow *window)
 	// TODO: this should be configurable
 	this->m_font_name = "fonts/arial.ttf";
 	
+	this->text_color = {1.0f, 1.0f, 1.0f, 1.0f};
+	
 	init_text_rendering();
 	
 	debug("Initializing GLEW...");
@@ -108,11 +110,11 @@ void renderer::init_text_rendering()
 		g.bearing = { (int)face->glyph->bitmap_left, (int)face->glyph->bitmap_top };
 		g.advance = face->glyph->advance.x;
 		
-		if (offset_x + (int)face->glyph->bitmap.width >= bitmap_width) {
+		if (offset_x + (int)face->glyph->bitmap.width + 2 >= bitmap_width) {
 			offset_y += font_size + 2;
 			offset_x = 0;
 		}
-		g.origin = {offset_x, offset_y};
+		g.origin = {offset_x+1, offset_y+1};
 		offset_x += face->glyph->bitmap.width + 2;
 		
 		for (int y = 0; y < g.size(1); y++) {
@@ -448,12 +450,9 @@ vector2f renderer::get_text_size(std::string text, float size)
 
 void renderer::draw_text_centered(std::string text, float x, float y, float size)
 {
-	trace("Drawing text: '%s' %f %f %f", text.c_str(), x, y, size);
 	const float size_factor = size / 96.0f;
 	this->m_current_program = this->m_text_program;
 	glUseProgram(this->m_current_program);
-	
-	vector4f text_color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	
 	this->reload_mvp();
 	
@@ -470,7 +469,6 @@ void renderer::draw_text_centered(std::string text, float x, float y, float size
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
 	
 	vector2f rendered_size = this->get_text_size(text, size);
-	trace("Size of rendered text: %f, %f", rendered_size(0), rendered_size(1));
 	
 	float offset_x = x - rendered_size(0) * 0.5f;
 	float offset_y = y + rendered_size(1) * 0.5f;

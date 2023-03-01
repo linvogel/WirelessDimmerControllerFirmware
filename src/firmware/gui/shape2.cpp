@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cmath>
 
+#define MODULE_NAME "shape2"
 #include "../logging.hpp"
 
 dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
