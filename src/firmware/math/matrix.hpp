@@ -4,16 +4,6 @@
 #include <cstdlib>
 #include <memory>
 
-#include "../logging.hpp"
-
-#define debug_mat4(mat)\
-debug("Matrix " #mat ":");\
-debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,0), mat(1,0), mat(2,0), mat(3,0));\
-debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,1), mat(1,1), mat(2,1), mat(3,1));\
-debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,2), mat(1,2), mat(2,2), mat(3,2));\
-debug("[%2.3f %2.3f %2.3f %2.3f]", mat(0,3), mat(1,3), mat(2,3), mat(3,3));
-
-
 // although this does not quite fit here: since this is the main math file of the firmware
 const double PI = 3.14159265358979323846;
 const double PI2 = 2*PI;
@@ -30,7 +20,6 @@ namespace dim {
 			matrix() : idx([](size_t i, size_t j) { return j*W + i; }) {}
 			matrix(std::initializer_list<T> l) : matrix() {
 				if (l.size() != W*H) {
-					fatal("Matrix initializer list differs in size from matrix it should initialize (initalizer list: %ld, matrix: %ld)", l.size(), W*H);
 					throw "matrix error: invalid initializer list";
 				}
 				// copy all elements from the initializer list to the matrix data
@@ -57,7 +46,6 @@ namespace dim {
 			T& operator()(size_t i, size_t j) const {
 				// runtime checks to prevent segmentation faults
 				if (i >= W || j >= H) {
-					fatal("Matrix indices out of bounds! Size id %ldx%ld and index was %ld,%ld!", W, H, i, j);
 					throw "matrix error: index out of bounds";
 				}
 				
@@ -67,7 +55,6 @@ namespace dim {
 			T& operator()(size_t i) const {
 				// runtime checks to prevent segmentation faults
 				if (i >= W*H) {
-					fatal("Matrix index out of bounds! Size is %ld and index was %ld!", W*H, i);
 					throw "matrix error: index out of bounds";
 				}
 				
@@ -84,7 +71,7 @@ namespace dim {
 				matrix<T,H,W> out;
 				for (size_t i = 0; i < W; i++) {
 					for (size_t j = 0; j < H; j++) {
-						out(j,i) = this(i,j);
+						out(j,i) = this->operator()(i,j);
 					}
 				}
 				return out;
@@ -190,3 +177,12 @@ namespace dim {
 		}
 	}
 }
+
+#ifndef _DIM_DISABLE_GLOBAL_MATRICES
+using matrix2f = dim::math::matrix<float,2,2>;
+using matrix3f = dim::math::matrix<float,3,3>;
+using matrix4f = dim::math::matrix<float,4,4>;
+using vector2f = dim::math::matrix<float,1,2>;
+using vector3f = dim::math::matrix<float,1,3>;
+using vector4f = dim::math::matrix<float,1,4>;
+#endif

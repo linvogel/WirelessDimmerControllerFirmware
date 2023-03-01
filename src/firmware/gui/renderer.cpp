@@ -1,8 +1,13 @@
 #include "renderer.hpp"
 #include "../errors.hpp"
 
+#define MODULE_NAME "renderer"
+#include "../logging.hpp"
+
 #include <fstream>
 #include <cmath>
+
+using namespace dim::gui;
 
 #ifndef NDEBUG
 #define GL_CALL(x) \
@@ -17,11 +22,16 @@
 #define GL_CALL(x) x
 #endif
 
-dim::gui::renderer::renderer(GLFWwindow *window)
+renderer::renderer(GLFWwindow *window)
 {
+	this->m_font_atlas = 0;
 	this->m_window = window;
-	
 	glfwMakeContextCurrent(this->m_window);
+	
+	// TODO: this should be configurable
+	this->m_font_name = "fonts/arial.ttf";
+	
+	init_text_rendering();
 	
 	debug("Initializing GLEW...");
 	if (glewInit() != GLEW_OK) {
@@ -37,6 +47,7 @@ dim::gui::renderer::renderer(GLFWwindow *window)
 	
 	info("Loading shaders...");
 	this->m_base_program = this->createShader("shaders/basic_vertex.glsl", "shaders/basic_fragment.glsl");
+	this->m_text_program = this->createShader("shaders/font_vertex.glsl", "shaders/font_fragment.glsl");
 	this->m_current_program = this->m_base_program;
 	GL_CALL(glUseProgram(this->m_current_program));
 	
@@ -45,14 +56,97 @@ dim::gui::renderer::renderer(GLFWwindow *window)
     GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     GL_CALL(glEnable( GL_BLEND ));
 	GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+	
+	GL_CALL(glGenBuffers(1, &(this->m_text_vertex_buffer)));
 }
 
-dim::gui::renderer::~renderer()
+void renderer::init_text_rendering()
 {
-	glDeleteProgram(this->m_base_program);
+	debug("Initializing text rendering...");
+	
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft)) {
+		error("Unable to load freetype, text will not be rendererd!");
+		return;
+	}
+	
+	verbose("Creating font face...");
+	FT_Face face;
+	if (FT_New_Face(ft, this->m_font_name.c_str(), 0, &face)) {
+		error("Unable to load font '%s'! Fonts will not be rendered!", this->m_font_name.c_str());
+		return;
+	}
+	
+	verbose("Set general font parameters...");
+	const int font_size = 96;
+	FT_Set_Pixel_Sizes(face, 0, font_size); // large enough so as to never encounter it, this may change
+	
+	// clear font texture and atlas
+	if (this->m_font_atlas) GL_CALL(glDeleteTextures(1, &(this->m_font_atlas)));
+	this->m_font_map.clear();
+	
+	this->bitmap_width = (font_size+2)*20;
+	this->bitmap_height = (font_size+2)*20;
+	auto idx = [&](int x, int y) { return x + this->bitmap_width * y; };
+	std::vector<uint8_t> atlas_data(this->bitmap_width * this->bitmap_height, 0); // generate space for approx 400 characters
+	
+	int offset_x = 1;
+	int offset_y = 1;
+	
+	verbose("Creating character atlas...");
+	for (int i = 0; i < 256; i++) { // NOTE: this generates all ascii and extended ascii codes, maybe there is a better way to do that
+		char c = (char)i; // nothing larger that 255 is possible here, see loop condition
+		
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+			error("Character '%c' cannot be loaded. This character will not be rendererd");
+			// TODO: replace glphy in map with something
+			continue;
+		}
+		
+		glyph g = {};
+		g.size = { (int)face->glyph->bitmap.width, (int)face->glyph->bitmap.rows };
+		g.bearing = { (int)face->glyph->bitmap_left, (int)face->glyph->bitmap_top };
+		g.advance = face->glyph->advance.x;
+		
+		if (offset_x + (int)face->glyph->bitmap.width >= bitmap_width) {
+			offset_y += font_size + 2;
+			offset_x = 0;
+		}
+		g.origin = {offset_x, offset_y};
+		offset_x += face->glyph->bitmap.width + 2;
+		
+		for (int y = 0; y < g.size(1); y++) {
+			for (int x = 0; x < g.size(0); x++) {
+				atlas_data[idx(x+g.origin(0), y+g.origin(1))] = face->glyph->bitmap.buffer[x + y*face->glyph->bitmap.width];
+			}
+		}
+		
+		this->m_font_map.insert(std::make_pair(c, g));
+		
+	}
+	
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	
+	glGenTextures(1, &(this->m_font_atlas));
+	glBindTexture(GL_TEXTURE_2D, this->m_font_atlas);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, bitmap_width, bitmap_height, 0, GL_RED, GL_UNSIGNED_BYTE, atlas_data.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+	
+	info("Text rendering initialized successfully!");
 }
 
-unsigned int dim::gui::renderer::create_2d_float_vertex_buffer_simple(size_t size, float* data)
+renderer::~renderer()
+{
+
+}
+
+unsigned int renderer::create_2d_float_vertex_buffer_simple(size_t size, float* data)
 {
 	unsigned int buffer;
 	GL_CALL(glGenBuffers(1, &buffer));
@@ -64,7 +158,7 @@ unsigned int dim::gui::renderer::create_2d_float_vertex_buffer_simple(size_t siz
 	return buffer;
 }
 
-void dim::gui::renderer::update_buffer(unsigned int buffer, size_t size, float* data)
+void renderer::update_buffer(unsigned int buffer, size_t size, float* data)
 {
 	if (buffer != 0) {
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
@@ -108,7 +202,7 @@ static int compileShader(unsigned int type, const std::string &file_name)
 	return id;
 }
 
-int dim::gui::renderer::createShader(const std::string &vertex_shader_file, const std::string &fragment_shader_file)
+int renderer::createShader(const std::string &vertex_shader_file, const std::string &fragment_shader_file)
 {
 	unsigned int program;
 	GL_CALL(program = glCreateProgram());
@@ -126,185 +220,199 @@ int dim::gui::renderer::createShader(const std::string &vertex_shader_file, cons
 	return program;
 }
 
-void dim::gui::renderer::reset()
+void renderer::reset()
 {
 	this->m_proj_stack.clear();
 	this->m_view_stack.clear();
 	this->m_model_stack.clear();
-	this->m_proj_stack.push_back(dim::math::matrix4f::identity());
-	this->m_view_stack.push_back(dim::math::matrix4f::identity());
-	this->m_model_stack.push_back(dim::math::matrix4f::identity());
+	this->m_proj_stack.push_back(matrix4f::identity());
+	this->m_view_stack.push_back(matrix4f::identity());
+	this->m_model_stack.push_back(matrix4f::identity());
 	GL_CALL(glViewport(0, 0, 800, 480));
 	this->ortho(0, 800, 480, 0, -1, 1);
 	this->update_mvp();
 }
 
 
-void dim::gui::renderer::wait()
+void renderer::wait()
 {
 	glfwWaitEvents();
 }
 
-void dim::gui::renderer::wait(double timeout)
+void renderer::wait(double timeout)
 {
 	glfwWaitEventsTimeout(timeout);
 }
 
-void dim::gui::renderer::poll()
+void renderer::poll()
 {
 	glfwPollEvents();
 }
 
-void dim::gui::renderer::swap()
+void renderer::swap()
 {
 	glfwSwapBuffers(this->m_window);
 }
 
-void dim::gui::renderer::set_swap_interval(int i)
+void renderer::set_swap_interval(int i)
 {
 	glfwSwapInterval(i);
 }
 
-void dim::gui::renderer::push_proj()
+void renderer::push_proj()
 {
 	this->m_proj_stack.push_back(this->m_proj_stack.back());
 }
 
-void dim::gui::renderer::pop_proj()
+void renderer::pop_proj()
 {
 	if (this->m_proj_stack.size() > 1) this->m_proj_stack.pop_back();
 }
 
-void dim::gui::renderer::push_view()
+void renderer::push_view()
 {
 	this->m_view_stack.push_back(this->m_view_stack.back());
 }
 
-void dim::gui::renderer::pop_view()
+void renderer::pop_view()
 {
 	if (this->m_view_stack.size() > 1) this->m_view_stack.pop_back();
 }
 
-void dim::gui::renderer::push_model()
+void renderer::push_model()
 {
 	this->m_model_stack.push_back(this->m_model_stack.back());
 }
 
-void dim::gui::renderer::pop_model()
+void renderer::pop_model()
 {
 	if (this->m_model_stack.size() > 1) this->m_model_stack.pop_back();
 }
 
-void dim::gui::renderer::ortho(float left, float right, float bottom, float top, float near, float far)
+void renderer::ortho(float left, float right, float bottom, float top, float near, float far)
 {
-	dim::math::matrix4f mat = {
-		(float)(2.0 / (right - left)), 0.0, 0.0, -((right + left) / (right - left)),
-		0.0, (float)(2.0 / (top - bottom)), 0.0, -((top + bottom) / (top - bottom)),
-		0.0, 0.0, (float)(-2.0 / (far - near)), -((far + near) / (far - near)),
-		0.0, 0.0, 0.0, 1.0
+	matrix4f mat = {
+		(float)(2.0 / (right - left)), 0.0,                               0.0,                          -((right + left) / (right - left)),
+		0.0,                           (float)(2.0 / (top - bottom)),     0.0,                          -((top + bottom) / (top - bottom)),
+		0.0,                           0.0,                               (float)(-2.0 / (far - near)), -((far + near) / (far - near)),
+		0.0,                           0.0,                               0.0,                          1.0
 	};
 	
-	mat *= this->m_proj_stack.back();
+	//mat *= this->m_proj_stack.back();
 	this->m_proj_stack.back() = mat;
 }
 
-void dim::gui::renderer::update_mvp()
+void renderer::update_mvp()
 {
-	dim::math::matrix4f mvp = this->m_proj_stack.back() * this->m_view_stack.back() * this->m_model_stack.back();
+	this->mvp = this->m_proj_stack.back() * this->m_view_stack.back() * this->m_model_stack.back();
 	int location;
 	GL_CALL(location = glGetUniformLocation(this->m_current_program, "MVP"));
-	dim::math::matrix4f &mat = this->m_proj_stack.back();
-	if (location != -1) GL_CALL(glUniformMatrix4fv(location, 1, GL_TRUE, mvp.get_data()));
+	if (location != -1) GL_CALL(glUniformMatrix4fv(location, 1, GL_TRUE, this->mvp.get_data()));
 }
 
-void dim::gui::renderer::transform(dim::math::vector2f pos, float angle, dim::math::vector2f scale)
+void renderer::reload_mvp()
 {
-	this->translate(pos, false);
+	int location;
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "MVP"));
+	if (location != -1) GL_CALL(glUniformMatrix4fv(location, 1, GL_TRUE, this->mvp.get_data()));
+}
+
+void renderer::transform(vector2f pos, float angle, vector2f scale)
+{
+	this->scale(scale, false);
 	this->rotate(angle, false);
-	this->scale(scale, true);
+	this->translate(pos, true);
 }
 
-void dim::gui::renderer::translate(dim::math::vector2f position, bool update_uniform_mvp)
+void renderer::translate(vector2f position, bool update_uniform_mvp)
 {
-	dim::math::matrix4f mat = dim::math::matrix4f::identity();
-	mat(3, 0) = position(0);
-	mat(3, 1) = position(1);
+	matrix4f mat = matrix4f::identity();
+	vector4f pos = { position(0), position(1), 0, 0 };
+	pos = this->m_proj_stack.back() * pos;
+	mat(3, 0) = pos(0);
+	mat(3, 1) = pos(1);
 	mat *= this->m_proj_stack.back();
 	this->m_proj_stack.back() = mat;
 		
 	if (update_uniform_mvp) this->update_mvp();
 }
 
-void dim::gui::renderer::rotate(float angle, bool update_uniform_mvp)
+void renderer::rotate(float angle, bool update_uniform_mvp)
 {
-	dim::math::matrix4f mat = dim::math::matrix4f::identity();
+	matrix4f mat = matrix4f::identity();
 	float s = static_cast<float>(std::sin(static_cast<double>(angle)));
 	float c = static_cast<float>(std::cos(static_cast<double>(angle)));
 	mat(0, 0) = c;
 	mat(1, 1) = c;
-	mat(1, 0) = -s;
-	mat(0, 1) = s;
+	mat(1, 0) = s;
+	mat(0, 1) = -s;
 	mat *= this->m_proj_stack.back();
 	this->m_proj_stack.back() = mat;
 	
 	if (update_uniform_mvp) this->update_mvp();
 }
 
-void dim::gui::renderer::scale(dim::math::vector2f scale, bool update_uniform_mvp)
+void renderer::scale(vector2f scale, bool update_uniform_mvp)
 {
-	dim::math::matrix4f mat = dim::math::matrix4f::identity();
+	matrix4f mat = matrix4f::identity();
 	mat(0, 0) = scale(0);
 	mat(1, 1) = scale(1);
-	mat *= this->m_proj_stack.back();
+	mat = mat * this->m_proj_stack.back();
 	this->m_proj_stack.back() = mat;
 	
 	if (update_uniform_mvp) this->update_mvp();
 }
 
-void dim::gui::renderer::clear()
+void renderer::clear()
 {
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void dim::gui::renderer::draw_shape(dim::gui::shape2 *shape)
+void renderer::draw_shape(shape2 *shape)
 {
 	if (shape->m_buffer == 0) {
 		error("cannot render buffer, buffer not initialized on gpu!");
 		return;
 	}
 	
-	int location = glGetUniformLocation(this->m_current_program, "u_corner_radius");
-	glUniform1f(location, shape->m_corner_radius);
-	location = glGetUniformLocation(this->m_current_program, "u_bounds");
-	glUniform4f(location, shape->m_bounds.x, shape->m_bounds.y, shape->m_bounds.w, shape->m_bounds.h);
-	location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness");
-	glUniform1f(location, shape->m_edge_smoothness);
-	location = glGetUniformLocation(this->m_current_program, "u_stroke_weight");
-	glUniform1f(location, shape->m_stroke_weight);
-	location = glGetUniformLocation(this->m_current_program, "u_stroke_color");
-	glUniform4fv(location, 1, shape->m_stroke_color.get_data());
-	location = glGetUniformLocation(this->m_current_program, "u_bg_color");
-	glUniform4fv(location, 1, shape->m_background_color.get_data());
+	this->m_current_program = this->m_base_program;
+	GL_CALL(glUseProgram(this->m_current_program));
+	
+	this->reload_mvp();
+	
+	int location;
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_corner_radius"));
+	GL_CALL(glUniform1f(location, shape->m_corner_radius));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bounds"));
+	GL_CALL(glUniform4f(location, shape->m_bounds.x + shape->m_offset(0), shape->m_bounds.y + shape->m_offset(1), shape->m_bounds.w, shape->m_bounds.h));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness"));
+	GL_CALL(glUniform1f(location, shape->m_edge_smoothness));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_weight"));
+	GL_CALL(glUniform1f(location, shape->m_stroke_weight));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_color"));
+	GL_CALL(glUniform4fv(location, 1, shape->m_stroke_color.get_data()));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bg_color"));
+	GL_CALL(glUniform4fv(location, 1, shape->m_background_color.get_data()));
 	
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
 	GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data(), GL_STREAM_DRAW));
 	GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (const void*)0));
 	GL_CALL(glEnableVertexAttribArray(0));
-	dim::gui::line2 *line;
-	dim::gui::triang2 *tri;
-	dim::gui::quad2 *quad;
-	dim::gui::circle2 *circle;
+	line2 *line;
+	triang2 *tri;
+	quad2 *quad;
+	circle2 *circle;
 	
-	if (line = dynamic_cast<dim::gui::line2*>(shape)) {
+	if (line = dynamic_cast<line2*>(shape)) {
 		// draw line
 		GL_CALL(glDrawArrays(GL_LINES, 0, 2));
-	} else if (tri = dynamic_cast<dim::gui::triang2*>(shape)) {
+	} else if (tri = dynamic_cast<triang2*>(shape)) {
 		// draw triangle
 		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 3));
-	} else if (quad = dynamic_cast<dim::gui::quad2*>(shape)) {
+	} else if (quad = dynamic_cast<quad2*>(shape)) {
 		// draw quad
 		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 6));
-	} else if (circle = dynamic_cast<dim::gui::circle2*>(shape)) {
+	} else if (circle = dynamic_cast<circle2*>(shape)) {
 		// draw circle
 		GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, N_VERT_CIRCLE + 2));
 	} else {
@@ -313,4 +421,88 @@ void dim::gui::renderer::draw_shape(dim::gui::shape2 *shape)
 	
 	GL_CALL(glDisableVertexAttribArray(0));
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+}
+
+vector2f renderer::get_text_size(std::string text, float size)
+{
+	float minx = size;
+	float maxx = 0;
+	float miny = size;
+	float maxy = -size;
+	float offset = 0;
+	const float scale = size / 96.0f;
+	
+	glyph &first = this->m_font_map[text[0]];
+	minx = (float)(first.bearing(0));
+	
+	for (char c : text) {
+		glyph &g = this->m_font_map[c];
+		maxx = offset + g.bearing(0) + g.size(0);
+		offset += g.advance >> 6;
+		maxy = std::max(maxy, (float)(g.bearing(1)));
+		miny = std::min(maxy, (float)(g.bearing(1) - g.size(1)));
+	}
+	
+	return { (maxx - minx) * scale, (maxy - miny) * scale };
+}
+
+void renderer::draw_text_centered(std::string text, float x, float y, float size)
+{
+	trace("Drawing text: '%s' %f %f %f", text.c_str(), x, y, size);
+	const float size_factor = size / 96.0f;
+	this->m_current_program = this->m_text_program;
+	glUseProgram(this->m_current_program);
+	
+	vector4f text_color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	
+	this->reload_mvp();
+	
+	int location;
+	location = glGetUniformLocation(this->m_current_program, "u_text_color");
+	glUniform4fv(location, 1, text_color.get_data());
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindBuffer(GL_ARRAY_BUFFER, this->m_text_vertex_buffer);
+	glBindTexture(GL_TEXTURE_2D, this->m_font_atlas);
+	
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_STREAM_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
+	
+	vector2f rendered_size = this->get_text_size(text, size);
+	trace("Size of rendered text: %f, %f", rendered_size(0), rendered_size(1));
+	
+	float offset_x = x - rendered_size(0) * 0.5f;
+	float offset_y = y + rendered_size(1) * 0.5f;
+	
+	for (char c : text) {
+		const glyph &g = this->m_font_map[c];
+		float uv_x = (float)(g.origin(0)) / (float)(this->bitmap_width);
+		float uv_y = (float)(g.origin(1)) / (float)(this->bitmap_height);
+		float uv_w = (float)(g.size(0)) / (float)(this->bitmap_width);
+		float uv_h = (float)(g.size(1)) / (float)(this->bitmap_height);
+		
+		float local_x = std::ceil(offset_x + (size_factor * (float)(g.bearing(0))));
+		float local_y = std::ceil(offset_y - (size_factor * (float)(g.bearing(1))));
+		float local_w = std::ceil(size_factor * (float)(g.size(0)));
+		float local_h = std::ceil(size_factor * (float)(g.size(1)));
+		
+		float data[6*4] = {
+			local_x        , local_y        , uv_x     , uv_y     ,
+			local_x+local_w, local_y        , uv_x+uv_w, uv_y     ,
+			local_x        , local_y+local_h, uv_x     , uv_y+uv_h,
+			local_x+local_w, local_y        , uv_x+uv_w, uv_y     ,
+			local_x+local_w, local_y+local_h, uv_x+uv_w, uv_y+uv_h,
+			local_x        , local_y+local_h, uv_x     , uv_y+uv_h,
+		};
+		
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		
+		offset_x += std::ceil(size_factor * (float)(g.advance >> 6)); // the advance is given in a unit of 1/64th pixel, so divide by 64 to get in pixels
+	}
+	
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

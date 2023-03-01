@@ -13,12 +13,13 @@ namespace dim {
 		class input_controller {
 		private:
 			GLFWwindow *m_window;
+			dim::gui::component *m_comp;
 			int m_keys[N_KEYS];
-			int m_buttons[N_BUTTONS];
+			bool m_buttons[N_BUTTONS];
 			float m_mousex;
 			float m_mousey;
-			
-			dim::gui::component* m_comp;
+			float m_dx;
+			float m_dy;
 			
 		public:
 			input_controller();

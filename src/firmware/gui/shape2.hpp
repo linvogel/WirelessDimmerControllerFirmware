@@ -32,12 +32,13 @@ namespace dim {
 			unsigned int m_buffer;
 			float* m_data;
 			
+			vector4f m_offset;
 			bounds m_bounds;
 			float m_corner_radius;
 			float m_edge_smoothness;
 			float m_stroke_weight;
-			dim::math::vector4f m_stroke_color;
-			dim::math::vector4f m_background_color;
+			vector4f m_stroke_color;
+			vector4f m_background_color;
 			
 		public:
 			shape2(renderer &renderer, size_t size, float *positions);
@@ -100,28 +101,31 @@ namespace dim {
 			 *
 			 * @param stroke_color the stroke color as RGBA
 			 */
-			virtual void set_stroke_color(dim::math::vector4f stroke_color) { this->m_stroke_color = stroke_color; }
+			virtual void set_stroke_color(vector4f stroke_color) { this->m_stroke_color = stroke_color; }
 			
 			/**
 			 * @brief Set the background color of this shape.
 			 * 
 			 * @param bg_color the background color as RGBA
 			 */
-			virtual void set_background_color(dim::math::vector4f bg_color) { this->m_background_color = bg_color; }
+			virtual void set_background_color(vector4f bg_color) { this->m_background_color = bg_color; }
 			
 			/**
 			 * @brief Get the bounds of this shape
 			 * 
 			 * @return vector4f containing the bounds of this shape
 			 */
-			virtual dim::math::vector4f get_bounds() final { return dim::math::vector4f({this->m_bounds.x, this->m_bounds.y, this->m_bounds.w, this->m_bounds.h}); }
+			virtual vector4f get_bounds() final { return vector4f({this->m_bounds.x, this->m_bounds.y, this->m_bounds.w, this->m_bounds.h}); }
 			
 			/**
 			 * @brief Get the size of this shape
 			 * 
 			 * @return vector2f containing the size of this shape
 			 */
-			virtual dim::math::vector2f get_size() final { return dim::math::vector2f({this->m_bounds.w, this->m_bounds.h}); }
+			virtual vector2f get_size() final { return vector2f({this->m_bounds.w, this->m_bounds.h}); }
+			
+			virtual void set_offset(float x, float y) { this->m_offset(0) = x; this->m_offset(1) = y; }
+			virtual vector4f get_offset() { return this->m_offset; }
 		};
 		
 		
@@ -129,27 +133,27 @@ namespace dim {
 		public:
 			line2(renderer &renderer, std::initializer_list<float> values): shape2(renderer, 4, values) {}
 			line2(renderer &renderer, float x1, float y1, float x2, float y2);
-			line2(renderer &renderer, dim::math::vector2f a, dim::math::vector2f b);
+			line2(renderer &renderer, vector2f a, vector2f b);
 		};
 		
 		class triang2 : public virtual shape2 {
 		public:
 			triang2(renderer &renderer, std::initializer_list<float> values): shape2(renderer, 6, values) {}
 			triang2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3);
-			triang2(renderer &renderer, dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c);
+			triang2(renderer &renderer, vector2f a, vector2f b, vector2f c);
 		};
 		
 		class quad2 : public virtual shape2 {
 		public:
 			quad2(renderer &renderer, std::initializer_list<float> values): shape2(renderer, 8, values) {}
 			quad2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
-			quad2(renderer &renderer, dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c, dim::math::vector2f d);
+			quad2(renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d);
 		};
 		
 		class circle2 : public virtual shape2 {
 		public:
 			circle2(renderer &renderer, float x, float y, float r);
-			circle2(renderer &renderer, dim::math::vector2f pos, float r) : circle2(renderer, pos(0), pos(1), r) {}
+			circle2(renderer &renderer, vector2f pos, float r) : circle2(renderer, pos(0), pos(1), r) {}
 			
 			void set_corner_radius(float rad) override { this->m_corner_radius = 0; }
 		};

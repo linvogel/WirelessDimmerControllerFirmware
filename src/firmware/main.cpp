@@ -3,12 +3,18 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#define MODULE_NAME "main"
 #include "logging.hpp"
 #include "errors.hpp"
 
 #include "math/matrix.hpp"
 
 #include "gui/window.hpp"
+#include "gui/button.hpp"
+
+using namespace dim::gui;
+using namespace dim::in;
+
 
 int main()
 {
@@ -28,9 +34,13 @@ int main()
 	 */
 	
 	// create window object and prepare interfaces
-	dim::gui::window window("Dimmer Controller", 800, 480);
-	dim::gui::renderer &renderer = window.get_renderer();
-	dim::in::input_controller &input_controller = window.get_input_ctrl();
+	window window("Dimmer Controller", 800, 480);
+	renderer &renderer = window.get_renderer();
+	input_controller &input_controller = window.get_input_ctrl();
+	
+	button btn1("Button", []() {std::cout << "btn1 pressed" << std::endl;}, renderer, 100, 100, 150, 30);
+	
+	window.add(&btn1);
 	
 	renderer.set_swap_interval(1);
 	

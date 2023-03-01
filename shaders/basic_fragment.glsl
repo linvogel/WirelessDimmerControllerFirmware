@@ -12,7 +12,7 @@ uniform vec4 u_bg_color;
 
 void main()
 {
-	vec2 local_position = vec2(gl_FragCoord.x - u_bounds.x, 480 - gl_FragCoord.y - u_bounds.y);
+	vec2 local_position = vec2(gl_FragCoord.x - u_bounds.x, u_bounds.w - gl_FragCoord.y - u_bounds.y);
 	float max_width = min(u_bounds.z, u_bounds.w) * 0.5;
 	float corner_size = min(u_corner_radius, max_width);
 	

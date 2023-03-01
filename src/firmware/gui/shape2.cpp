@@ -25,6 +25,7 @@ dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
 	this->m_buffer = renderer.create_2d_float_vertex_buffer_simple(this->m_nElements, this->m_data);
 	
 	this->m_corner_radius = 0;
+	this->m_offset = {0, 0, 0, 0};
 	
 	// Note: this only works for 2d vertex buffer with only the position attribute
 	this->m_bounds = {800, 480, 0, 0};
@@ -102,20 +103,20 @@ void dim::gui::shape2::update_buffer(dim::gui::renderer &renderer, size_t size, 
 // line 2
 dim::gui::line2::line2(dim::gui::renderer &renderer, float x1, float y1, float x2, float y2)
 	: shape2(renderer, 4, {x1, y1, x2, y2}) {}
-dim::gui::line2::line2(dim::gui::renderer &renderer, dim::math::vector2f a, dim::math::vector2f b)
+dim::gui::line2::line2(dim::gui::renderer &renderer, vector2f a, vector2f b)
 	: shape2(renderer, 4, {a(0), a(1), b(0), b(1)}) {}
 
 // triang 2
 dim::gui::triang2::triang2(dim::gui::renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3)
 	: shape2(renderer, 6, {x1, y1, x2, y2, x3, y3}) {}
-dim::gui::triang2::triang2(dim::gui::renderer &renderer, dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c)
+dim::gui::triang2::triang2(dim::gui::renderer &renderer, vector2f a, vector2f b, vector2f c)
 	: shape2(renderer, 6, { a(0), a(1), b(0), b(1), c(0), c(1) }) {}
 
 // quad 2
 dim::gui::quad2::quad2(dim::gui::renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 	: shape2(renderer, 12, {x1, y1, x2, y2, x3, y3, x1, y1, x3, y3, x4, y4}) {
 }
-dim::gui::quad2::quad2(dim::gui::renderer &renderer, dim::math::vector2f a, dim::math::vector2f b, dim::math::vector2f c, dim::math::vector2f d)
+dim::gui::quad2::quad2(dim::gui::renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d)
 	: shape2(renderer, 12, { a(0), a(1), b(0), b(1), c(0), c(1), a(0), a(1), c(0), c(1), d(0), d(1) }) {
 }
 
@@ -123,13 +124,13 @@ dim::gui::quad2::quad2(dim::gui::renderer &renderer, dim::math::vector2f a, dim:
 dim::gui::circle2::circle2(dim::gui::renderer &renderer, float x, float y, float r) : shape2(renderer, 2*N_VERT_CIRCLE + 4)
 {
 	// prepare some space for the values
-	dim::math::vector2f current({1, 0});
-	dim::math::vector2f tmp;
+	vector2f current({1, 0});
+	vector2f tmp;
 	// prepare for geometric calculations
 	double angle = PI2 / N_VERT_CIRCLE;
 	float s = static_cast<float>(std::sin(angle));
 	float c = static_cast<float>(std::cos(angle));
-	dim::math::matrix2f rot_mat({c, -s, s, c});
+	matrix2f rot_mat({c, -s, s, c});
 	
 	this->m_data[0] = x;
 	this->m_data[1] = y;

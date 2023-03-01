@@ -1,6 +1,7 @@
 {
 	"C_Cpp.default.includePath": [
 		"glfw/include",
+		"freetype/include",
 		"src/glew/include",
 		"src/firmware"
 	],

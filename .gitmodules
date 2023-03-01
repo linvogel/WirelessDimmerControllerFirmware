@@ -2,3 +2,6 @@
 	path = glfw
 	branch = 3.3-stable
 	url = https://github.com/glfw/glfw.git
+[submodule "freetype"]
+	path = freetype
+	url = https://github.com/freetype/freetype.git

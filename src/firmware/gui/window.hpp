@@ -19,11 +19,8 @@ namespace dim {
 		class window : public virtual component {
 		private:
 			GLFWwindow *m_window;
-			renderer m_renderer;
+			std::shared_ptr<renderer> m_renderer;
 			std::shared_ptr<dim::in::input_controller> m_input_ctrl;
-			
-			dim::math::vector4f m_bg_color;
-			dim::math::vector4f m_fg_color;
 			
 		public:
 			/**
@@ -39,11 +36,10 @@ namespace dim {
 			virtual void draw_component(renderer &renderer);
 			
 			GLFWwindow *get_window() { return this->m_window; };
-			renderer &get_renderer() { return this->m_renderer; };
+			renderer &get_renderer() { return *(this->m_renderer); };
 			dim::in::input_controller &get_input_ctrl() { return *(this->m_input_ctrl); };
 			int shoud_close();
 			
-			virtual void handle_click_event(dim::event::click_event event) override;
 		};
 		
 	}

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <ctime>
+#include <chrono>
 #include <algorithm>
 #include <string.h>
 
@@ -46,8 +47,9 @@ void dim::log::_log(std::string mod_name, dim::log::log_level level, std::string
 {
 	if (level > current_level) return;
 	char date_time[256];
-	time_t raw_time;
-	time(&raw_time);
+	std::chrono::time_point now = std::chrono::system_clock::now();
+	std::chrono::milliseconds millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+	time_t raw_time = std::chrono::system_clock::to_time_t(now);
 	struct tm *timeinfo = localtime(&raw_time);
 	strftime(date_time, 255, "%Y-%m-%d %H:%M:%S", timeinfo);
 	
@@ -56,7 +58,7 @@ void dim::log::_log(std::string mod_name, dim::log::log_level level, std::string
 	char buf_msg[64*1024];
 	char buf_pre[256];
 	size_t printed_msg = vsnprintf(buf_msg, 64*1024, fmt.c_str(), args);
-	size_t printed_pre = snprintf(buf_pre, 256, "[%s][%s][%s] ", date_time, mod_name.c_str(), level_names[level].c_str());
+	size_t printed_pre = snprintf(buf_pre, 256, "[%s.%03d][%s][%s] ", date_time, (int)(millis.count() % 1000), mod_name.c_str(), level_names[level].c_str());
 	if (printed_msg <= 0 || printed_msg >= 64*1024) error("Log message exceeded 64KB! Please enuse that log messages are strictly smaller in size than 64KB!");
 	if (printed_pre <= 0 || printed_pre >= 256) fatal("failed to print prefix size!");
 	

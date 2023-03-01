@@ -3,9 +3,9 @@
 #include <vector>
 #include <memory>
 
+#include <iostream>
+
 #include "../math/matrix.hpp"
-#include "../event/event.hpp"
-#include "../event/click_event.hpp"
 #include "renderer.hpp"
 
 namespace dim {
@@ -24,16 +24,19 @@ namespace dim {
 			std::vector<component*> m_children;
 			component* m_focussed;
 			
-			dim::math::vector2f m_position;
-			dim::math::vector2f m_size;
-			dim::math::vector2f m_scale;
+			vector2f m_position;
+			vector2f m_size;
+			vector2f m_scale;
 			float m_angle;
 			
 			std::shared_ptr<dim::gui::shape2> m_shape;
 			
+			vector4f m_bg_color;
+			vector4f m_fg_color;
+			
 		public:
-			component(dim::math::vector2f pos, dim::math::vector2f scale, float angle);
-			component(float x, float y, float sx, float sy, float angle) : component({x, y}, {sx, sy}, angle) {}
+			component(vector2f pos, vector2f scale, float angle, vector2f size);
+			component(float x, float y, float scalex, float scaley, float angle, float sizex, float sizey) : component({x, y}, {scalex, scaley}, angle, {sizex, sizey}) {}
 			~component() = default;
 			
 			/**
@@ -82,22 +85,30 @@ namespace dim {
 			 * 
 			 * @param renderer The renderer instance to use.
 			 */
-			virtual void draw_component(renderer &renderer) {};
+			virtual void draw_component(renderer &renderer);
 			
-			/**
-			 * @brief Handles generic events sent to this component.
-			 * 
-			 * @param event Some event 
-			 */
-			virtual void handle_generic_event(std::shared_ptr<dim::event::event> event) final;
+			virtual void set_shape(std::shared_ptr<shape2> shape) { this->m_shape = shape; }
+			virtual std::shared_ptr<shape2> get_shape() { return this->m_shape; }
 			
-			/**
-			 * @brief Handle a click event in this component
-			 * 
-			 * @param event 
-			 */
-			virtual void handle_click_event(dim::event::click_event event) {};
+			virtual component* get_focussed() { return this->m_focussed; }
+			virtual void focus(component* comp) { this->m_focussed = comp; }
+			virtual bool hit(float local_x, float local_y); 
+			virtual component* hit_children(float local_x, float local_y); 
 			
+			
+			virtual void onMouseEnter() {};
+			virtual void onMouseExit() {};
+			virtual void onLeftMouseDown(float local_x, float local_y) {}
+			virtual void onLeftMouseUp(float local_x, float local_y) {}
+			virtual void onRightMouseDown(float local_x, float local_y) {}
+			virtual void onRightMouseUp(float local_x, float local_y) {}
+			virtual void onKeyPressed(int key, int mod) {}
+			virtual void onKeyReleased(int key, int mod) {}
+			virtual void onKeyTyped(int key, int mod) {}
+			virtual void onScrollUp() {}
+			virtual void onScrollDown() {}
+			virtual void onScrollLeft() {}
+			virtual void onScrollRight() {}
 		};
 		
 	}
