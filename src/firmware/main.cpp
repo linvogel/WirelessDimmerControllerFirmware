@@ -52,7 +52,7 @@ int main()
 	button btn1("Button", [&]() { renderer.text_color = cols[count++ % 5]; }, renderer, 10, 10, 150, 30);
 	button btn2("Mute", []() { std::cout << "btn2 pressed" << std::endl; }, renderer, 10, 50, 150, 30);
 	
-	slider sld1(renderer, 300, 100, 60, 280, 0, 1);
+	slider sld1(renderer, 300, 200, 60, 280, 0, 1);
 	
 	panel pnl1(renderer, 100, 100, 170, 90);
 	
