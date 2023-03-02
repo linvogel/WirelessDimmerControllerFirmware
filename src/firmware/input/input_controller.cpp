@@ -88,6 +88,17 @@ void dim::in::input_controller::mouse_callback(double x, double y)
 	this->m_mousey = (float)y;
 	component* cur = this->m_comp->hit_children(this->m_mousex, this->m_mousey);
 	
+	vector2f offset = { 0, 0 };
+	if (this->m_comp->get_focussed()) {
+		for (component *c = this->m_comp->get_focussed(); c; c = c->get_parent()) offset += c->get_position();
+		this->m_comp->get_focussed()->onMouseMove(this->m_mousex - offset(0), this->m_mousey - offset(1));
+	}
+	offset = { 0, 0 };
+	if (cur) {
+		for (component *c = cur; c; c = c->get_parent()) offset += c->get_position();
+		cur->onMouseMove(this->m_mousex - offset(0), this->m_mousey - offset(1));
+	}
+	
 	// if old and cur are the same, nothing changed, so return
 	if (cur == old) return;
 	

@@ -99,6 +99,7 @@ namespace dim {
 			
 			virtual void onMouseEnter() {};
 			virtual void onMouseExit() {};
+			virtual void onMouseMove(float local_x, float local_y) {}
 			virtual void onLeftMouseDown(float local_x, float local_y) {}
 			virtual void onLeftMouseUp(float local_x, float local_y) {}
 			virtual void onRightMouseDown(float local_x, float local_y) {}

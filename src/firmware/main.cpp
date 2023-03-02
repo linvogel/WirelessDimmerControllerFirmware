@@ -12,6 +12,7 @@
 #include "gui/window.hpp"
 #include "gui/button.hpp"
 #include "gui/panel.hpp"
+#include "gui/slider.hpp"
 
 using namespace dim::gui;
 using namespace dim::in;
@@ -51,9 +52,12 @@ int main()
 	button btn1("Button", [&]() { renderer.text_color = cols[count++ % 5]; }, renderer, 10, 10, 150, 30);
 	button btn2("Mute", []() { std::cout << "btn2 pressed" << std::endl; }, renderer, 10, 50, 150, 30);
 	
+	slider sld1(renderer, 300, 100, 60, 280, 0, 1);
+	
 	panel pnl1(renderer, 100, 100, 170, 90);
 	
 	window.add(&pnl1);
+	window.add(&sld1);
 	pnl1.add(&btn1);
 	pnl1.add(&btn2);
 	

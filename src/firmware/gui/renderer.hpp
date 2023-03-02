@@ -55,8 +55,6 @@ namespace dim {
 			std::string m_font_name;
 			
 			void init_text_rendering();
-			void update_mvp();
-			void reload_mvp();
 			
 		public:
 			vector4f text_color;
@@ -75,6 +73,9 @@ namespace dim {
 			void swap();
 			void set_swap_interval(int i);
 			void clear();
+			
+			void update_mvp();
+			void reload_mvp();
 			
 			void push_proj();
 			void pop_proj();

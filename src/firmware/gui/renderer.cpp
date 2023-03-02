@@ -413,6 +413,9 @@ void renderer::draw_shape(shape2 *shape)
 		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 3));
 	} else if (quad = dynamic_cast<quad2*>(shape)) {
 		// draw quad
+		float data[12];
+		glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)*12, data);
+		trace("Drawing quad: %f %f %f %f %f %f %f %f %f %f %f %f", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[8], data[10], data[11]);
 		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 6));
 	} else if (circle = dynamic_cast<circle2*>(shape)) {
 		// draw circle
