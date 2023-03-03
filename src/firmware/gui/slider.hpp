@@ -10,6 +10,8 @@ namespace dim {
 			quad2 m_rail;
 			quad2 m_knob;
 			
+			dim::math::vector4f m_drag_col;
+			
 			float m_min_value;
 			float m_max_value;
 			float m_knob_width;
@@ -18,9 +20,12 @@ namespace dim {
 			
 			bool m_grabbed;
 			float m_value;
+			float m_pos;
+			float m_start_pos;
 			float m_len;
 			float m_miny;
 			float m_maxy;
+			float m_mousey;
 			
 		public:
 			slider(renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height);
