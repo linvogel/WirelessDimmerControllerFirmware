@@ -377,7 +377,7 @@ void renderer::draw_shape(shape2 *shape)
 		return;
 	}
 	
-	this->m_current_program = this->m_base_program;
+	this->m_current_program = shape->m_special_program;
 	GL_CALL(glUseProgram(this->m_current_program));
 	
 	this->reload_mvp();

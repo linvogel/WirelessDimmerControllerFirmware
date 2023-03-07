@@ -17,7 +17,7 @@ namespace dim {
 		public:
 			knob(renderer &renderer, float x, float y, float size);
 			
-			virtual void drawComponent(renderer &renderer) override;
+			virtual void draw_component(renderer &renderer) override;
 			
 			virtual void onLeftMouseDown(float x, float y) override;
 			virtual void onLeftMouseUp(float x, float y) override;

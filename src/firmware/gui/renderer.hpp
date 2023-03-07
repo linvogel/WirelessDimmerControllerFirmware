@@ -65,6 +65,7 @@ namespace dim {
 			int createShader(const std::string &vertex_shader_file, const std::string &fragment_shader_file);
 			unsigned int create_2d_float_vertex_buffer_simple(size_t size, float* data);
 			void update_buffer(unsigned int buffer, size_t size, float* data);
+			unsigned int get_base_program() { return this->m_base_program; }
 			
 			void reset();
 			void wait();

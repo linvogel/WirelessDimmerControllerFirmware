@@ -13,6 +13,7 @@
 #include "gui/button.hpp"
 #include "gui/panel.hpp"
 #include "gui/slider.hpp"
+#include "gui/knob.hpp"
 
 using namespace dim::gui;
 using namespace dim::in;
@@ -54,8 +55,11 @@ int main()
 	
 	slider sld1(renderer, 300, 200, 60, 280, 0, 1);
 	
+	knob kn1(renderer, 500, 100, 100);
+	
 	panel pnl1(renderer, 100, 100, 170, 90);
 	
+	window.add(&kn1);
 	window.add(&pnl1);
 	window.add(&sld1);
 	pnl1.add(&btn1);

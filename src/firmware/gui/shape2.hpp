@@ -40,6 +40,8 @@ namespace dim {
 			vector4f m_stroke_color;
 			vector4f m_background_color;
 			
+			unsigned int m_special_program;
+			
 		public:
 			shape2(renderer &renderer, size_t size, float *positions);
 			shape2(renderer &renderer, size_t size, std::initializer_list<float>);
@@ -123,6 +125,8 @@ namespace dim {
 			 * @return vector2f containing the size of this shape
 			 */
 			virtual vector2f get_size() final { return vector2f({this->m_bounds.w, this->m_bounds.h}); }
+			
+			virtual void set_special_program(unsigned int program) { this->m_special_program = program; }
 			
 			virtual void set_offset(float x, float y) { this->m_offset(0) = x; this->m_offset(1) = y; }
 			virtual vector4f get_offset() { return this->m_offset; }

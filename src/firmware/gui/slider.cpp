@@ -48,7 +48,6 @@ void slider::draw_component(renderer &renderer)
 {
 	renderer.draw_shape(this->m_shape.get());
 	
-	
 	float rail_x = (this->m_size(0) - this->m_rail_width) * 0.5f;
 	float rail_y = this->m_knob_height*0.5f;
 	float knob_x = 5;

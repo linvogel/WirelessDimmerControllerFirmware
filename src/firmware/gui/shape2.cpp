@@ -39,6 +39,7 @@ dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
 	this->m_bounds.w -= this->m_bounds.x;
 	this->m_bounds.h -= this->m_bounds.y;
 	
+	this->m_special_program = renderer.get_base_program();
 	this->m_edge_smoothness = 1.0f;
 	this->m_stroke_weight = 0.0f;
 	this->m_stroke_color = {0.0f, 0.0f, 1.0f, 1.0f};
