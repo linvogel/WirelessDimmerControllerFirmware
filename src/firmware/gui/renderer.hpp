@@ -6,6 +6,7 @@
 #include "component.hpp"
 #include "shape2.hpp"
 #include "../math/matrix.hpp"
+#include "../util/custom_array.hpp"
 
 #include <map>
 
@@ -17,6 +18,7 @@ namespace dim {
 		
 		class component; // circular dependency resolution
 		class shape2;
+		class texture;
 		
 		using ivec2 = dim::math::matrix<int, 1, 2>;
 		
@@ -43,6 +45,7 @@ namespace dim {
 			
 			unsigned int m_base_program;
 			unsigned int m_text_program;
+			unsigned int m_texture_program;
 			unsigned int m_current_program;
 			
 			unsigned int m_font_atlas;
@@ -63,9 +66,11 @@ namespace dim {
 			~renderer();
 			
 			int createShader(const std::string &vertex_shader_file, const std::string &fragment_shader_file);
-			unsigned int create_2d_float_vertex_buffer_simple(size_t size, float* data);
-			void update_buffer(unsigned int buffer, size_t size, float* data);
+			unsigned int create_2d_float_vertex_buffer_simple(size_t size, custom_array<float> &data);
+			void update_buffer(unsigned int buffer, size_t size, custom_array<float> &data);
 			unsigned int get_base_program() { return this->m_base_program; }
+			
+			unsigned int create_texture(uint8_t *data, int width, int height, int bpp, int channels);
 			
 			void reset();
 			void wait();

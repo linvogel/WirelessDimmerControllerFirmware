@@ -1,5 +1,8 @@
 #include "slider.hpp"
 
+#ifdef MODULE_NAME
+#undef MODULE_NAME
+#endif
 #define MODULE_NAME "slider"
 #include "../logging.hpp"
 

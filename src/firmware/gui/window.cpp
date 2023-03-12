@@ -1,6 +1,9 @@
 #include "window.hpp"
 #include "../errors.hpp"
 
+#ifdef MODULE_NAME
+#undef MODULE_NAME
+#endif
 #define MODULE_NAME "window"
 #include "../logging.hpp"
 

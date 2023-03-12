@@ -12,8 +12,12 @@ namespace dim {
 			float m_min_angle;
 			float m_max_angle;
 			float m_angle;
+			float m_start_angle;
+			float m_mousey;
+			float m_sensitivity;
+			bool m_grabbed;
 			
-			quad2 m_knob;
+			textured_quad2 m_knob;
 		public:
 			knob(renderer &renderer, float x, float y, float size);
 			

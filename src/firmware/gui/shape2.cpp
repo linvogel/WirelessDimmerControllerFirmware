@@ -5,32 +5,36 @@
 #include <cstring>
 #include <cmath>
 
+#ifdef MODULE_NAME
+#undef MODULE_NAME
+#endif
 #define MODULE_NAME "shape2"
 #include "../logging.hpp"
 
-dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
+using namespace dim::gui;
+
+shape2::shape2(renderer &renderer, size_t size, float *data)
+	: m_corner_radius(0)
+	, m_edge_smoothness(1)
+	, m_special_program(renderer.get_base_program())
+	, m_stroke_weight(0)
 {
 	debug("creating shape2...");
 	this->m_buffer = 0;
 	this->m_nElements = size;
-	this->m_data = (float*)std::malloc(this->m_nElements * sizeof(float));
+	this->m_data = custom_array<float>(this->m_nElements);
 	
-	if (this->m_data == nullptr) {
-		error("shape2 buffer allocation failed");
-		return;
-	}
 	verbose("shape2 buffer allocated, copying supplied data...");
 	
-	if (data) std::memcpy(this->m_data, data, this->m_nElements * sizeof(float));
+	if (data) for (size_t i = 0; i < this->m_nElements; i++) this->m_data[i] = data[i];
 	
 	this->m_buffer = renderer.create_2d_float_vertex_buffer_simple(this->m_nElements, this->m_data);
 	
-	this->m_corner_radius = 0;
 	this->m_offset = {0, 0, 0, 0};
 	
 	// Note: this only works for 2d vertex buffer with only the position attribute
 	this->m_bounds = {800, 480, 0, 0};
-	for (size_t i = 0; i < this->m_nElements; i+= 2) {
+	for (size_t i = 0; i < this->m_nElements-1; i+= 2) {
 		this->m_bounds.x = std::min(this->m_bounds.x, this->m_data[i]);
 		this->m_bounds.y = std::min(this->m_bounds.y, this->m_data[i+1]);
 		this->m_bounds.w = std::max(this->m_bounds.w, this->m_data[i]);
@@ -39,59 +43,43 @@ dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, float *data)
 	this->m_bounds.w -= this->m_bounds.x;
 	this->m_bounds.h -= this->m_bounds.y;
 	
-	this->m_special_program = renderer.get_base_program();
-	this->m_edge_smoothness = 1.0f;
-	this->m_stroke_weight = 0.0f;
 	this->m_stroke_color = {0.0f, 0.0f, 1.0f, 1.0f};
 	this->m_background_color = {0.0f, 0.0f, 0.0f, 0.0f};
 	
 	verbose("shape2 created");
 }
 
-dim::gui::shape2::shape2(dim::gui::renderer &renderer, size_t size, std::initializer_list<float> values) : shape2(renderer, size)
+shape2::shape2(renderer &renderer, size_t size, std::initializer_list<float> values) : shape2(renderer, size)
 {
 	if (size != values.size()) {
 		warn("shape2 init received initializer list that is not the same size as the declared buffer!");
 	}
-	if (this->m_data) {
-		size_t i = 0;
-		for (float f : values) {
-			if (i == std::min(values.size(), size)) break;
-			this->m_data[i++] = f;
-		}
+	
+	size_t i = 0;
+	for (float f : values) {
+		if (i == std::min(values.size(), size)) break;
+		this->m_data[i++] = f;
 	}
 	
 	// update the buffer so that the data travels to the gpu
 	this->update_buffer(renderer);
 }
 
-dim::gui::shape2::~shape2()
+shape2::~shape2()
 {
 	debug("destroying shape2");
-	if (this->m_data) std::free(this->m_data);
 }
 
-void dim::gui::shape2::update_buffer(dim::gui::renderer &renderer, size_t size, float* data)
+void shape2::update_buffer(renderer &renderer, size_t size, custom_array<float> &data)
 {
-	trace("updating shape2 buffer...");
-	if (this->m_nElements != size) {
-		verbose("resizing shpae2 buffer...");
-		void* ret = std::realloc(this->m_data, size * sizeof(float));
-		if (!ret) {
-			error("Failed to reallocate CPU side of buffer");
-			return;
-		} else {
-			this->m_nElements = size;
-			this->m_data = (float*)ret;
-		}
-	}
-	
-	if (this->m_data != data) std::memcpy(this->m_data, data, this->m_nElements * sizeof(float));
+	this->m_data = data;
+	if (this->m_data.get() == nullptr) return;
 	
 	renderer.update_buffer(this->m_buffer, this->m_nElements, this->m_data);
 	
 	this->m_bounds = {800, 480, 0, 0};
 	for (size_t i = 0; i < this->m_nElements; i+= 2) {
+		float a = this->m_data[i];
 		this->m_bounds.x = std::min(this->m_bounds.x, this->m_data[i]);
 		this->m_bounds.y = std::min(this->m_bounds.y, this->m_data[i+1]);
 		this->m_bounds.w = std::max(this->m_bounds.w, this->m_data[i]);
@@ -103,27 +91,27 @@ void dim::gui::shape2::update_buffer(dim::gui::renderer &renderer, size_t size, 
 
 
 // line 2
-dim::gui::line2::line2(dim::gui::renderer &renderer, float x1, float y1, float x2, float y2)
+line2::line2(renderer &renderer, float x1, float y1, float x2, float y2)
 	: shape2(renderer, 4, {x1, y1, x2, y2}) {}
-dim::gui::line2::line2(dim::gui::renderer &renderer, vector2f a, vector2f b)
+line2::line2(renderer &renderer, vector2f a, vector2f b)
 	: shape2(renderer, 4, {a(0), a(1), b(0), b(1)}) {}
 
 // triang 2
-dim::gui::triang2::triang2(dim::gui::renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3)
+triang2::triang2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3)
 	: shape2(renderer, 6, {x1, y1, x2, y2, x3, y3}) {}
-dim::gui::triang2::triang2(dim::gui::renderer &renderer, vector2f a, vector2f b, vector2f c)
+triang2::triang2(renderer &renderer, vector2f a, vector2f b, vector2f c)
 	: shape2(renderer, 6, { a(0), a(1), b(0), b(1), c(0), c(1) }) {}
 
 // quad 2
-dim::gui::quad2::quad2(dim::gui::renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+quad2::quad2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 	: shape2(renderer, 12, {x1, y1, x2, y2, x3, y3, x1, y1, x3, y3, x4, y4}) {
 }
-dim::gui::quad2::quad2(dim::gui::renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d)
+quad2::quad2(renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d)
 	: shape2(renderer, 12, { a(0), a(1), b(0), b(1), c(0), c(1), a(0), a(1), c(0), c(1), d(0), d(1) }) {
 }
 
 // circle 2
-dim::gui::circle2::circle2(dim::gui::renderer &renderer, float x, float y, float r) : shape2(renderer, 2*N_VERT_CIRCLE + 4)
+circle2::circle2(renderer &renderer, float x, float y, float r) : shape2(renderer, 2*N_VERT_CIRCLE + 4)
 {
 	// prepare some space for the values
 	vector2f current({1, 0});
@@ -150,4 +138,70 @@ dim::gui::circle2::circle2(dim::gui::renderer &renderer, float x, float y, float
 	this->m_data[2*N_VERT_CIRCLE + 3] = this->m_data[3];
 	
 	this->update_buffer(renderer);
+}
+
+// textured quad2
+textured_quad2::textured_quad2(renderer &renderer, std::initializer_list<float> values)
+	: shape2(renderer, 6 * 4)
+{
+	this->m_texture =  nullptr;
+	// order compatible with the generic quad2 implementation: 1 2 3 1 3 4
+	this->m_data[0] = *(values.begin()+0);
+	this->m_data[1] = *(values.begin()+1);
+	this->m_data[2] = 0;
+	this->m_data[3] = 0;
+	this->m_data[4] = *(values.begin()+2);
+	this->m_data[5] = *(values.begin()+3);
+	this->m_data[6] = 0;
+	this->m_data[7] = 0;
+	this->m_data[8] = *(values.begin()+4);
+	this->m_data[9] = *(values.begin()+5);
+	this->m_data[10] = 0;
+	this->m_data[11] = 0;
+	this->m_data[12] = *(values.begin()+0);
+	this->m_data[13] = *(values.begin()+1);
+	this->m_data[14] = 0;
+	this->m_data[15] = 0;
+	this->m_data[16] = *(values.begin()+4);
+	this->m_data[17] = *(values.begin()+5);
+	this->m_data[18] = 0;
+	this->m_data[19] = 0;
+	this->m_data[20] = *(values.begin()+6);
+	this->m_data[21] = *(values.begin()+7);
+	this->m_data[22] = 0;
+	this->m_data[23] = 0;
+}
+
+textured_quad2::textured_quad2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+	: textured_quad2(renderer, {x1, y1, x2, y2, x3, y3, x4, y4}) {}
+textured_quad2::textured_quad2(renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d)
+	: textured_quad2(renderer, { a(0), a(1), b(0), b(1), c(0), c(1), d(0), d(1) }) {}
+
+textured_quad2::~textured_quad2()
+{
+	if (this->m_texture) std::free(this->m_texture);
+}
+
+void textured_quad2::set_texture(texture *texture)
+{
+	this->m_texture = texture;
+}
+
+void textured_quad2::update_uv()
+{
+	// order compatible with the generic quad2 implementation: 1 2 3 1 3 4
+	this->m_data[2]  = this->m_texture->m_uv[0](0); // 1
+	this->m_data[3]  = this->m_texture->m_uv[0](1); // 1
+	this->m_data[6]  = this->m_texture->m_uv[1](0); // 2
+	this->m_data[7]  = this->m_texture->m_uv[1](1); // 2
+	this->m_data[10] = this->m_texture->m_uv[2](0); // 3
+	this->m_data[11] = this->m_texture->m_uv[2](1); // 3
+	this->m_data[14]  = this->m_texture->m_uv[0](0); // 1
+	this->m_data[15]  = this->m_texture->m_uv[0](1); // 1
+	this->m_data[18]  = this->m_texture->m_uv[2](0); // 3
+	this->m_data[19]  = this->m_texture->m_uv[2](1); // 3
+	this->m_data[22] = this->m_texture->m_uv[3](0); // 4
+	this->m_data[23] = this->m_texture->m_uv[3](1); // 4
+	
+	// Also: don't update anything related to the positions of the vertices
 }

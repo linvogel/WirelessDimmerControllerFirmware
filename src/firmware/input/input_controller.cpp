@@ -70,12 +70,12 @@ dim::in::input_controller::~input_controller()
 void dim::in::input_controller::key_callback(int key, int scancode, int action, int mods)
 {
 	if (action == GLFW_PRESS) {
-		this->m_comp->get_focussed()->onKeyPressed(key, mods);
+		if (this->m_comp->get_focussed()) this->m_comp->get_focussed()->onKeyPressed(key, mods);
 	} else if (action == GLFW_REPEAT) {
-		this->m_comp->get_focussed()->onKeyTyped(key, mods);
+		if (this->m_comp->get_focussed()) this->m_comp->get_focussed()->onKeyTyped(key, mods);
 	} else if (action == GLFW_RELEASE) {
-		this->m_comp->get_focussed()->onKeyTyped(key, mods);
-		this->m_comp->get_focussed()->onKeyReleased(key, mods);
+		if (this->m_comp->get_focussed()) this->m_comp->get_focussed()->onKeyTyped(key, mods);
+		if (this->m_comp->get_focussed()) this->m_comp->get_focussed()->onKeyReleased(key, mods);
 	}
 }
 

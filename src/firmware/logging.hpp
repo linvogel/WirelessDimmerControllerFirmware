@@ -6,6 +6,7 @@
 #include <array>
 #include <assert.h>
 
+#define _CUSTOM_LOGGING_INCLUDED
 
 static constexpr const char* _log_base_file_name(const char *full_name) {
 	const char* best = full_name;

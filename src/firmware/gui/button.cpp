@@ -1,5 +1,8 @@
 #include "button.hpp"
 
+#ifdef MODULE_NAME
+#undef MODULE_NAME
+#endif
 #define MODULE_NAME "button"
 #include "../logging.hpp"
 

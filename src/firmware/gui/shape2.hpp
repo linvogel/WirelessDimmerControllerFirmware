@@ -2,7 +2,9 @@
 
 #include "../math/matrix.hpp"
 #include "renderer.hpp"
+#include "texture.hpp"
 
+#include "../util/custom_array.hpp"
 
 const int N_VERT_CIRCLE = 32;
 
@@ -10,6 +12,7 @@ namespace dim {
 	namespace gui {
 		
 		class renderer;
+		class texture;
 		
 		struct bounds {
 			float x;
@@ -30,7 +33,7 @@ namespace dim {
 		protected:
 			size_t m_nElements;
 			unsigned int m_buffer;
-			float* m_data;
+			custom_array<float> m_data;
 			
 			vector4f m_offset;
 			bounds m_bounds;
@@ -56,7 +59,7 @@ namespace dim {
 			 * @param size the number of elements in the data
 			 * @param buffer the data
 			 */
-			virtual void update_buffer(renderer &renderer, size_t size, float* buffer);
+			virtual void update_buffer(renderer &renderer, size_t size, custom_array<float> &buffer);
 			
 			/**
 			 * @brief Update this buffer under the assumption that the size has remained the same.
@@ -72,7 +75,7 @@ namespace dim {
 			 * @return float* a pointer to the data of this buffer. The size of the associated memory region
 			 * can be queried with size()
 			 */
-			virtual float* data() { return this->m_data; }
+			virtual custom_array<float> data() { return this->m_data; }
 			
 			/**
 			 * @brief Size of this buffer
@@ -130,6 +133,8 @@ namespace dim {
 			
 			virtual void set_offset(float x, float y) { this->m_offset(0) = x; this->m_offset(1) = y; }
 			virtual vector4f get_offset() { return this->m_offset; }
+			
+			virtual bool is_textured() { return false; }
 		};
 		
 		
@@ -162,5 +167,23 @@ namespace dim {
 			void set_corner_radius(float rad) override { this->m_corner_radius = 0; }
 		};
 		
-	}	
+		class textured_quad2 : public virtual shape2 {
+			friend renderer;
+			
+			texture *m_texture;
+			
+		public:
+			textured_quad2(renderer &renderer, std::initializer_list<float> values);
+			textured_quad2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
+			textured_quad2(renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d);
+			
+			~textured_quad2();
+			
+			void set_texture(texture *texture);
+			void update_uv();
+			
+			virtual bool is_textured() override { return true; }
+		};
+		
+	}
 }

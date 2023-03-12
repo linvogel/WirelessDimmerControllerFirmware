@@ -67,6 +67,17 @@ namespace dim {
 				return out;
 			}
 			
+			matrix<T,W,H>& normalize()
+			{
+				T len = 0;
+				for (int i = 0; i < W*H; i++) len += this->operator()(i) * this->operator()(i);
+				
+				T f = ((T)1) / len;
+				for (int i = 0; i < W*H; i++) this->operator()(i) *= f;
+				
+				return *this;
+			}
+			
 			matrix<T,H,W> transpose() const {
 				matrix<T,H,W> out;
 				for (size_t i = 0; i < W; i++) {

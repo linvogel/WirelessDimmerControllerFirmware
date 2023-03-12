@@ -1,6 +1,9 @@
 #include "renderer.hpp"
 #include "../errors.hpp"
 
+#ifdef MODULE_NAME
+#undef MODULE_NAME
+#endif
 #define MODULE_NAME "renderer"
 #include "../logging.hpp"
 
@@ -50,6 +53,7 @@ renderer::renderer(GLFWwindow *window)
 	info("Loading shaders...");
 	this->m_base_program = this->createShader("shaders/basic_vertex.glsl", "shaders/basic_fragment.glsl");
 	this->m_text_program = this->createShader("shaders/font_vertex.glsl", "shaders/font_fragment.glsl");
+	this->m_texture_program = this->createShader("shaders/texture.vert.glsl", "shaders/texture.frag.glsl");
 	this->m_current_program = this->m_base_program;
 	GL_CALL(glUseProgram(this->m_current_program));
 	
@@ -148,24 +152,26 @@ renderer::~renderer()
 
 }
 
-unsigned int renderer::create_2d_float_vertex_buffer_simple(size_t size, float* data)
+unsigned int renderer::create_2d_float_vertex_buffer_simple(size_t size, custom_array<float> &data)
 {
 	unsigned int buffer;
 	GL_CALL(glGenBuffers(1, &buffer));
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-	GL_CALL(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, GL_STATIC_DRAW));
+	GL_CALL(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data.get(), GL_STATIC_DRAW));
 	GL_CALL(glEnableVertexAttribArray(0));
 	GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0));
 	
 	return buffer;
 }
 
-void renderer::update_buffer(unsigned int buffer, size_t size, float* data)
+void renderer::update_buffer(unsigned int buffer, size_t size, custom_array<float> &data)
 {
+	trace("renderer::update_buffer");
 	if (buffer != 0) {
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-		GL_CALL(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, GL_STATIC_DRAW));
+		GL_CALL(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data.get(), GL_STATIC_DRAW));
 	}
+	trace("renderer::update_buffer done.");
 }
 
 static int compileShader(unsigned int type, const std::string &file_name)
@@ -377,52 +383,97 @@ void renderer::draw_shape(shape2 *shape)
 		return;
 	}
 	
-	this->m_current_program = shape->m_special_program;
-	GL_CALL(glUseProgram(this->m_current_program));
-	
-	this->reload_mvp();
-	
 	int location;
-	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_corner_radius"));
-	GL_CALL(glUniform1f(location, shape->m_corner_radius));
-	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bounds"));
-	GL_CALL(glUniform4f(location, shape->m_bounds.x + shape->m_offset(0), shape->m_bounds.y + shape->m_offset(1), shape->m_bounds.w, shape->m_bounds.h));
-	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness"));
-	GL_CALL(glUniform1f(location, shape->m_edge_smoothness));
-	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_weight"));
-	GL_CALL(glUniform1f(location, shape->m_stroke_weight));
-	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_color"));
-	GL_CALL(glUniform4fv(location, 1, shape->m_stroke_color.get_data()));
-	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bg_color"));
-	GL_CALL(glUniform4fv(location, 1, shape->m_background_color.get_data()));
-	
-	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
-	GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data(), GL_STREAM_DRAW));
-	GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (const void*)0));
-	GL_CALL(glEnableVertexAttribArray(0));
-	line2 *line;
-	triang2 *tri;
-	quad2 *quad;
-	circle2 *circle;
-	
-	if (line = dynamic_cast<line2*>(shape)) {
-		// draw line
-		GL_CALL(glDrawArrays(GL_LINES, 0, 2));
-	} else if (tri = dynamic_cast<triang2*>(shape)) {
-		// draw triangle
-		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 3));
-	} else if (quad = dynamic_cast<quad2*>(shape)) {
-		// draw quad
+	if (shape->is_textured()) {
+		// for now, only textured quads are supported
+		textured_quad2 *tquad = dynamic_cast<textured_quad2*>(shape);
+		if (tquad == nullptr) {
+			error("Textured shape is not textured_quad2!!! Only textured_quad2 is supported for now");
+			return;
+		}
+		
+		this->m_current_program = this->m_texture_program;
+		info("Drawing textured shape with program %d", this->m_current_program);
+		GL_CALL(glUseProgram(this->m_current_program));
+		
+		this->reload_mvp();
+		
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_base_texture"));
+		GL_CALL(glUniform1i(location, 1)); // GL_TEXTURE1
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_normal_map"));
+		GL_CALL(glUniform1i(location, 2)); // GL_TEXTURE2
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_light_dir"));
+		GL_CALL(glUniform3fv(location, 1, vector3f({1.0f, 1.0f, 1.0f}).normalize().get_data()));
+		
+		debug("check 1");
+		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
+		GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data().get(), GL_STREAM_DRAW));
+		GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)0));
+		GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)8));
+		GL_CALL(glEnableVertexAttribArray(0));
+		GL_CALL(glEnableVertexAttribArray(1));
+		debug("check 2");
+		
+		// bind texture
+		GL_CALL(glActiveTexture(GL_TEXTURE1));
+		GL_CALL(glBindTexture(GL_TEXTURE_2D, tquad->m_texture->m_base_texture));
+		GL_CALL(glActiveTexture(GL_TEXTURE2));
+		GL_CALL(glBindTexture(GL_TEXTURE_2D, tquad->m_texture->m_normal_texture));
+		debug("check 3");
+		
 		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 6));
-	} else if (circle = dynamic_cast<circle2*>(shape)) {
-		// draw circle
-		GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, N_VERT_CIRCLE + 2));
+		
+		debug("check 4");
+		GL_CALL(glDisableVertexAttribArray(0));
+		GL_CALL(glDisableVertexAttribArray(1));
+		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	} else {
-		warn("Invalid shape type!");
+		this->m_current_program = this->m_base_program;
+		GL_CALL(glUseProgram(this->m_current_program));
+		
+		this->reload_mvp();
+		
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_corner_radius"));
+		GL_CALL(glUniform1f(location, shape->m_corner_radius));
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bounds"));
+		GL_CALL(glUniform4f(location, shape->m_bounds.x + shape->m_offset(0), shape->m_bounds.y + shape->m_offset(1), shape->m_bounds.w, shape->m_bounds.h));
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness"));
+		GL_CALL(glUniform1f(location, shape->m_edge_smoothness));
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_weight"));
+		GL_CALL(glUniform1f(location, shape->m_stroke_weight));
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_color"));
+		GL_CALL(glUniform4fv(location, 1, shape->m_stroke_color.get_data()));
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bg_color"));
+		GL_CALL(glUniform4fv(location, 1, shape->m_background_color.get_data()));
+		
+		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
+		GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data().get(), GL_STREAM_DRAW));
+		GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (const void*)0));
+		GL_CALL(glEnableVertexAttribArray(0));
+		line2 *line;
+		triang2 *tri;
+		quad2 *quad;
+		circle2 *circle;
+		
+		if (line = dynamic_cast<line2*>(shape)) {
+			// draw line
+			GL_CALL(glDrawArrays(GL_LINES, 0, 2));
+		} else if (tri = dynamic_cast<triang2*>(shape)) {
+			// draw triangle
+			GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 3));
+		} else if (quad = dynamic_cast<quad2*>(shape)) {
+			// draw quad
+			GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 6));
+		} else if (circle = dynamic_cast<circle2*>(shape)) {
+			// draw circle
+			GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, N_VERT_CIRCLE + 2));
+		} else {
+			warn("Invalid shape type!");
+		}
+		
+		GL_CALL(glDisableVertexAttribArray(0));
+		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
-	
-	GL_CALL(glDisableVertexAttribArray(0));
-	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
 
 vector2f renderer::get_text_size(std::string text, float size)
@@ -503,4 +554,19 @@ void renderer::draw_text_centered(std::string text, float x, float y, float size
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+unsigned int renderer::create_texture(uint8_t *data, int width, int height, int bpp, int channels)
+{
+	verbose("Creating texture...");
+	unsigned int texture;
+	GL_CALL(glGenTextures(1, &texture));
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	verbose("Texture created.");
+	
+	return texture;
 }

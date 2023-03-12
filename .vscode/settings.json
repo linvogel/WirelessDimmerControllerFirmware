@@ -3,7 +3,9 @@
 		"glfw/include",
 		"freetype/include",
 		"src/glew/include",
-		"src/firmware"
+		"src/firmware",
+		"lib/include",
+		"include"
 	],
 	"C_Cpp.default.defines": [
 		"_DIMMER_FILE_NAME_=\"MeaningfulFilename\""
@@ -99,8 +101,11 @@
 		"string_view": "cpp",
 		"numbers": "cpp",
 		"semaphore": "cpp",
-		"cinttypes": "cpp"
+		"cinttypes": "cpp",
+		"*.idl": "cpp",
+		"*.inc": "cpp"
 	},
 	"C_Cpp.default.cppStandard": "c++23",
-	"C_Cpp.default.cStandard": "c17"
+	"C_Cpp.default.cStandard": "c17",
+	"C_Cpp.errorSquiggles": "enabled"
 }

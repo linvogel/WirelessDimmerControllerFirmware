@@ -25,7 +25,7 @@ project(DimmerControllerFirmware)
 	
 	# find sources for main executable
 	file(GLOB_RECURSE MAIN_SOURCES src/firmware/*.cpp)
-	include_directories(src/glew/include glfw/include src/firmware freetype/include)
+	include_directories(src/glew/include glfw/include src/firmware freetype/include include)
 	
 	if("${TARGET}" STREQUAL "local")
 		add_definitions(-DGLEW_BUILD -DGLEW_STATIC)
