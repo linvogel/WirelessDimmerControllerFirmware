@@ -49,6 +49,7 @@ renderer::renderer(GLFWwindow *window)
 	this->m_proj_stack.reserve(128);
 	this->m_view_stack.reserve(128);
 	this->m_model_stack.reserve(128);
+	this->m_rotation_stack.reserve(128);
 	
 	info("Loading shaders...");
 	this->m_base_program = this->createShader("shaders/basic_vertex.glsl", "shaders/basic_fragment.glsl");
@@ -233,9 +234,11 @@ void renderer::reset()
 	this->m_proj_stack.clear();
 	this->m_view_stack.clear();
 	this->m_model_stack.clear();
+	this->m_rotation_stack.clear();
 	this->m_proj_stack.push_back(matrix4f::identity());
 	this->m_view_stack.push_back(matrix4f::identity());
 	this->m_model_stack.push_back(matrix4f::identity());
+	this->m_rotation_stack.push_back(matrix4f::identity());
 	GL_CALL(glViewport(0, 0, 800, 480));
 	this->ortho(0, 800, 480, 0, -1, 1);
 	this->update_mvp();
@@ -270,11 +273,13 @@ void renderer::set_swap_interval(int i)
 void renderer::push_proj()
 {
 	this->m_proj_stack.push_back(this->m_proj_stack.back());
+	push_rotation();
 }
 
 void renderer::pop_proj()
 {
 	if (this->m_proj_stack.size() > 1) this->m_proj_stack.pop_back();
+	pop_rotation();
 }
 
 void renderer::push_view()
@@ -295,6 +300,16 @@ void renderer::push_model()
 void renderer::pop_model()
 {
 	if (this->m_model_stack.size() > 1) this->m_model_stack.pop_back();
+}
+
+void renderer::push_rotation()
+{
+	this->m_rotation_stack.push_back(this->m_rotation_stack.back());
+}
+
+void renderer::pop_rotation()
+{
+	if (this->m_rotation_stack.size() > 1) this->m_rotation_stack.pop_back();
 }
 
 void renderer::ortho(float left, float right, float bottom, float top, float near, float far)
@@ -354,7 +369,10 @@ void renderer::rotate(float angle, bool update_uniform_mvp)
 	mat(1, 1) = c;
 	mat(1, 0) = s;
 	mat(0, 1) = -s;
-	mat *= this->m_proj_stack.back();
+	matrix4f &m = this->m_rotation_stack.back();
+	matrix4f mat1 = this->m_rotation_stack.back() * mat;
+	mat = this->m_proj_stack.back() * mat;
+	this->m_rotation_stack.back() = mat1;
 	this->m_proj_stack.back() = mat;
 	
 	if (update_uniform_mvp) this->update_mvp();
@@ -393,7 +411,6 @@ void renderer::draw_shape(shape2 *shape)
 		}
 		
 		this->m_current_program = this->m_texture_program;
-		info("Drawing textured shape with program %d", this->m_current_program);
 		GL_CALL(glUseProgram(this->m_current_program));
 		
 		this->reload_mvp();
@@ -403,27 +420,26 @@ void renderer::draw_shape(shape2 *shape)
 		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_normal_map"));
 		GL_CALL(glUniform1i(location, 2)); // GL_TEXTURE2
 		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_light_dir"));
-		GL_CALL(glUniform3fv(location, 1, vector3f({1.0f, 1.0f, 1.0f}).normalize().get_data()));
+		GL_CALL(glUniform3fv(location, 1, vector3f({1.0f, 1.0f, 2.0f}).normalize().get_data()));
+		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_rotation_matrix")); // pass rotation matrix
+		GL_CALL(glUniformMatrix4fv(location, 1, GL_TRUE, this->m_rotation_stack.back().get_data()));
 		
-		debug("check 1");
+		
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
 		GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data().get(), GL_STREAM_DRAW));
 		GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)0));
 		GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)8));
 		GL_CALL(glEnableVertexAttribArray(0));
 		GL_CALL(glEnableVertexAttribArray(1));
-		debug("check 2");
 		
 		// bind texture
 		GL_CALL(glActiveTexture(GL_TEXTURE1));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, tquad->m_texture->m_base_texture));
 		GL_CALL(glActiveTexture(GL_TEXTURE2));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, tquad->m_texture->m_normal_texture));
-		debug("check 3");
 		
 		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 6));
 		
-		debug("check 4");
 		GL_CALL(glDisableVertexAttribArray(0));
 		GL_CALL(glDisableVertexAttribArray(1));
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));

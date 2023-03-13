@@ -41,6 +41,7 @@ namespace dim {
 			std::vector<matrix4f> m_proj_stack;
 			std::vector<matrix4f> m_view_stack;
 			std::vector<matrix4f> m_model_stack;
+			std::vector<matrix4f> m_rotation_stack;
 			matrix4f mvp;
 			
 			unsigned int m_base_program;
@@ -89,6 +90,8 @@ namespace dim {
 			void pop_view();
 			void push_model();
 			void pop_model();
+			void push_rotation();
+			void pop_rotation();
 			void translate(float x, float y) { this->translate({x,y}); }
 			void translate(vector2f position, bool update_uniform_mvp = false);
 			void rotate(float angle, bool update_uniform_mvp = false);
