@@ -18,20 +18,25 @@ float single_component_cross(vec2 a, vec2 b)
 void main()
 {
 	vec2 local = vec2(gl_FragCoord.x - u_bounds.x, u_bounds.w - gl_FragCoord.y - u_bounds.y) - u_center_vec;
+	local.x *= -1;
 	
 	vec2 alpha = vec2(sin(u_angle), cos(u_angle)); // this has nothing to do with the alpha value of the render texture
 	
-	float min_to_max = sign(single_component_cross(u_alpha_min, u_alpha_max));
-	float min_to_alpha = sign(single_component_cross(u_alpha_min, alpha));
-	float max_to_min = sign(single_component_cross(u_alpha_max, u_alpha_min));
-	float max_to_alpha = sign(single_component_cross(u_alpha_min, alpha));
-	float min_to_local = sign(single_component_cross(u_alpha_min, local));
-	float local_to_alpha = sign(single_component_cross(local, alpha));
 	
-	float r = clamp(min_to_max * min_to_alpha,  0, 1);
-	float g = clamp(max_to_min * max_to_alpha, 0, 1);
-	float b = clamp(min_to_local * local_to_alpha, 0, 1);
+	float max2min = sign(single_component_cross(u_alpha_max, u_alpha_min));
+	float local2min = sign(single_component_cross(u_alpha_min, local));
+	float max2local = sign(single_component_cross(local, u_alpha_max));
+	float a2local = sign(single_component_cross(alpha, local));
+	float a2min = sign(single_component_cross(alpha, u_alpha_min));
 	
-	vec2 c = local * 0.01;
-	color = vec4(abs(c.x), abs(c.y), b, 1);
+	float v0 = min(1, max(0, local2min + (1-a2local) - a2min));
+	float v1 = min(1, max(0, local2min + max2local - max2min));
+	
+	float circle = clamp(0.5*u_bounds.z-length(local), 0, 1);
+	
+	vec3 unsel = vec3(0, 0, 0);
+	vec3 sel = vec3(1, 0, 1);
+	vec3 col = v0*sel + (1-v0)*unsel;
+	
+	color = vec4(col, v1 * circle);
 }

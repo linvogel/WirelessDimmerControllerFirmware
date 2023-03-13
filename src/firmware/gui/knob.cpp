@@ -42,24 +42,17 @@ void knob::draw_component(renderer &renderer)
 {
 	unsigned int program = this->m_shape->get_special_program();
 	renderer.set_program(program);
-	debug("hello 1");
 	
-	renderer.set_uniform_scalar(program, "u_angle", this->m_angle);
+	renderer.set_uniform_scalar(program, "u_angle", -this->m_angle);
 	vector4f bounds = {
 		this->m_shape->get_bounds()(0) + this->m_shape->get_offset()(0),
 		this->m_shape->get_bounds()(1) + this->m_shape->get_offset()(1),
 		this->m_shape->get_bounds()(2),
 		this->m_shape->get_bounds()(3)};
 	renderer.set_uniform_vec4(program, "u_bounds", bounds.get_data());
-	float *tmp = this->m_shape->get_offset().get_data();
-	verbose("Bounds: %f %f %f %f", tmp[0], tmp[1], tmp[2], tmp[3]);
-	debug("hello 11");
 	renderer.set_uniform_vec2(program, "u_alpha_min", this->m_alpha_min.get_data());
-	debug("hello 12");
 	renderer.set_uniform_vec2(program, "u_alpha_max", this->m_alpha_max.get_data());
-	debug("hello 13");
 	renderer.set_uniform_vec2(program, "u_center_vec", (this->m_size * 0.5f).get_data());
-	debug("hello 2");
 	if (this->m_shape.get()) renderer.draw_shape(this->m_shape.get());
 	
 	renderer.push_proj();
@@ -67,7 +60,7 @@ void knob::draw_component(renderer &renderer)
 	renderer.rotate(this->m_angle);
 	renderer.translate(this->m_size * -0.5f, true);
 	this->m_knob.set_offset(this->m_shape->get_offset()(0), this->m_shape->get_offset()(1));
-	//renderer.draw_shape(&(this->m_knob));
+	renderer.draw_shape(&(this->m_knob));
 	renderer.pop_proj();
 }
 
