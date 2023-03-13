@@ -45,7 +45,12 @@ void knob::draw_component(renderer &renderer)
 	debug("hello 1");
 	
 	renderer.set_uniform_scalar(program, "u_angle", this->m_angle);
-	renderer.set_uniform_vec4(program, "u_position", this->m_shape->get_offset().get_data());
+	vector4f bounds = {
+		this->m_shape->get_bounds()(0) + this->m_shape->get_offset()(0),
+		this->m_shape->get_bounds()(1) + this->m_shape->get_offset()(1),
+		this->m_shape->get_bounds()(2),
+		this->m_shape->get_bounds()(3)};
+	renderer.set_uniform_vec4(program, "u_bounds", bounds.get_data());
 	float *tmp = this->m_shape->get_offset().get_data();
 	verbose("Bounds: %f %f %f %f", tmp[0], tmp[1], tmp[2], tmp[3]);
 	debug("hello 11");

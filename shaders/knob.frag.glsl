@@ -7,7 +7,7 @@ uniform float u_angle;
 uniform vec2 u_center_vec;
 uniform vec2 u_alpha_min;
 uniform vec2 u_alpha_max;
-uniform vec4 u_position;
+uniform vec4 u_bounds;
 
 
 float single_component_cross(vec2 a, vec2 b)
@@ -17,7 +17,7 @@ float single_component_cross(vec2 a, vec2 b)
 
 void main()
 {
-	vec2 local = vec2(gl_FragCoord.x - u_position.x, -gl_FragCoord.y + 480 + (180 + u_position.y)) - u_center_vec;
+	vec2 local = vec2(gl_FragCoord.x - u_bounds.x, u_bounds.w - gl_FragCoord.y - u_bounds.y) - u_center_vec;
 	
 	vec2 alpha = vec2(sin(u_angle), cos(u_angle)); // this has nothing to do with the alpha value of the render texture
 	
