@@ -74,6 +74,16 @@ namespace dim {
 			unsigned int get_base_program() { return this->m_base_program; }
 			unsigned int get_knob_program() { return this->m_knob_program; }
 			
+			void set_program(unsigned int program);
+			
+			void set_uniform_scalar(unsigned int program, const char* name, float value);
+			void set_uniform_vec2(unsigned int program, const char* name, float *value);
+			void set_uniform_vec3(unsigned int program, const char* name, float *value);
+			void set_uniform_vec4(unsigned int program, const char* name, float *value);
+			void set_uniform_mat2(unsigned int program, const char* name, float *value);
+			void set_uniform_mat3(unsigned int program, const char* name, float *value);
+			void set_uniform_mat4(unsigned int program, const char* name, float *value);
+			
 			unsigned int create_texture(uint8_t *data, int width, int height, int bpp, int channels);
 			
 			void reset();

@@ -8,6 +8,8 @@ namespace dim {
 	namespace gui {
 		
 		class knob : public virtual component {
+			vector2f m_alpha_min;
+			vector2f m_alpha_max;
 			float m_value;
 			float m_min_angle;
 			float m_max_angle;

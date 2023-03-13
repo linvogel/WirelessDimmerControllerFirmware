@@ -130,6 +130,7 @@ namespace dim {
 			virtual vector2f get_size() final { return vector2f({this->m_bounds.w, this->m_bounds.h}); }
 			
 			virtual void set_special_program(unsigned int program) { this->m_special_program = program; }
+			virtual unsigned int get_special_program() { return this->m_special_program; }
 			
 			virtual void set_offset(float x, float y) { this->m_offset(0) = x; this->m_offset(1) = y; }
 			virtual vector4f get_offset() { return this->m_offset; }

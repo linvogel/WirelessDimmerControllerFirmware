@@ -445,23 +445,27 @@ void renderer::draw_shape(shape2 *shape)
 		GL_CALL(glDisableVertexAttribArray(1));
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	} else {
-		this->m_current_program = this->m_base_program;
+		this->m_current_program = shape->m_special_program;
 		GL_CALL(glUseProgram(this->m_current_program));
 		
 		this->reload_mvp();
 		
-		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_corner_radius"));
-		GL_CALL(glUniform1f(location, shape->m_corner_radius));
-		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bounds"));
-		GL_CALL(glUniform4f(location, shape->m_bounds.x + shape->m_offset(0), shape->m_bounds.y + shape->m_offset(1), shape->m_bounds.w, shape->m_bounds.h));
-		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness"));
-		GL_CALL(glUniform1f(location, shape->m_edge_smoothness));
-		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_weight"));
-		GL_CALL(glUniform1f(location, shape->m_stroke_weight));
-		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_color"));
-		GL_CALL(glUniform4fv(location, 1, shape->m_stroke_color.get_data()));
-		GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bg_color"));
-		GL_CALL(glUniform4fv(location, 1, shape->m_background_color.get_data()));
+		// if this the base program is used, populate the necessary variables
+		// otherwise, the caller must have already set the variables by itself
+		if (this->m_current_program == this->m_base_program) { 
+			GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_corner_radius"));
+			GL_CALL(glUniform1f(location, shape->m_corner_radius));
+			GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bounds"));
+			GL_CALL(glUniform4f(location, shape->m_bounds.x + shape->m_offset(0), shape->m_bounds.y + shape->m_offset(1), shape->m_bounds.w, shape->m_bounds.h));
+			GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness"));
+			GL_CALL(glUniform1f(location, shape->m_edge_smoothness));
+			GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_weight"));
+			GL_CALL(glUniform1f(location, shape->m_stroke_weight));
+			GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_color"));
+			GL_CALL(glUniform4fv(location, 1, shape->m_stroke_color.get_data()));
+			GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bg_color"));
+			GL_CALL(glUniform4fv(location, 1, shape->m_background_color.get_data()));
+		}
 		
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
 		GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data().get(), GL_STREAM_DRAW));
@@ -586,4 +590,60 @@ unsigned int renderer::create_texture(uint8_t *data, int width, int height, int 
 	verbose("Texture created.");
 	
 	return texture;
+}
+
+void renderer::set_program(unsigned int program)
+{
+	this->m_current_program = program;
+	GL_CALL(glUseProgram(this->m_current_program));
+}
+
+void renderer::set_uniform_scalar(unsigned int program, const char* name, float value)
+{
+	int location;
+	GL_CALL(location = glGetUniformLocation(program, name));
+	GL_CALL(glUniform1f(location, value));
+}
+
+void renderer::set_uniform_vec2(unsigned int program, const char* name, float *value)
+{
+	int location;
+	GL_CALL(location = glGetUniformLocation(program, name));
+	verbose("Pointer: %p, location: %d", value, location);
+	GL_CALL(glUniform2fv(location, 1, value));
+}
+
+void renderer::set_uniform_vec3(unsigned int program, const char* name, float *value)
+{
+	int location;
+	GL_CALL(location = glGetUniformLocation(program, name));
+	GL_CALL(glUniform3fv(location, 1, value));
+}
+
+void renderer::set_uniform_vec4(unsigned int program, const char* name, float *value)
+{
+	int location;
+	GL_CALL(location = glGetUniformLocation(program, name));
+	GL_CALL(glUniform4fv(location, 1, value));
+}
+
+void renderer::set_uniform_mat2(unsigned int program, const char* name, float *value)
+{
+	int location;
+	GL_CALL(location = glGetUniformLocation(program, name));
+	GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE, value));
+}
+
+void renderer::set_uniform_mat3(unsigned int program, const char* name, float *value)
+{
+	int location;
+	GL_CALL(location = glGetUniformLocation(program, name));
+	GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE, value));
+}
+
+void renderer::set_uniform_mat4(unsigned int program, const char* name, float *value)
+{
+	int location;
+	GL_CALL(location = glGetUniformLocation(program, name));
+	GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, value));
 }
