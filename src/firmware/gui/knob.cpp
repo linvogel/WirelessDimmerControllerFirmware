@@ -41,14 +41,19 @@ knob::knob(renderer &renderer, float x, float y, float size)
 void knob::draw_component(renderer &renderer)
 {
 	unsigned int program = this->m_shape->get_special_program();
+	renderer.set_program(program);
 	debug("hello 1");
+	
 	renderer.set_uniform_scalar(program, "u_angle", this->m_angle);
+	renderer.set_uniform_vec4(program, "u_position", this->m_shape->get_offset().get_data());
+	float *tmp = this->m_shape->get_offset().get_data();
+	verbose("Bounds: %f %f %f %f", tmp[0], tmp[1], tmp[2], tmp[3]);
 	debug("hello 11");
 	renderer.set_uniform_vec2(program, "u_alpha_min", this->m_alpha_min.get_data());
 	debug("hello 12");
 	renderer.set_uniform_vec2(program, "u_alpha_max", this->m_alpha_max.get_data());
 	debug("hello 13");
-	renderer.set_uniform_vec2(program, "u_center", (this->m_size * 0.5f).get_data());
+	renderer.set_uniform_vec2(program, "u_center_vec", (this->m_size * 0.5f).get_data());
 	debug("hello 2");
 	if (this->m_shape.get()) renderer.draw_shape(this->m_shape.get());
 	
