@@ -52,9 +52,10 @@ renderer::renderer(GLFWwindow *window)
 	this->m_rotation_stack.reserve(128);
 	
 	info("Loading shaders...");
-	this->m_base_program = this->createShader("shaders/basic_vertex.glsl", "shaders/basic_fragment.glsl");
-	this->m_text_program = this->createShader("shaders/font_vertex.glsl", "shaders/font_fragment.glsl");
+	this->m_base_program = this->createShader("shaders/basic.vert.glsl", "shaders/basic.frag.glsl");
+	this->m_text_program = this->createShader("shaders/font.vert.glsl", "shaders/font.frag.glsl");
 	this->m_texture_program = this->createShader("shaders/texture.vert.glsl", "shaders/texture.frag.glsl");
+	this->m_knob_program = this->createShader("shaders/knob.vert.glsl", "shaders/knob.frag.glsl");
 	this->m_current_program = this->m_base_program;
 	GL_CALL(glUseProgram(this->m_current_program));
 	

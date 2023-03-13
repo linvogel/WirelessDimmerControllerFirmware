@@ -44,10 +44,11 @@ namespace dim {
 			std::vector<matrix4f> m_rotation_stack;
 			matrix4f mvp;
 			
+			unsigned int m_current_program;
 			unsigned int m_base_program;
 			unsigned int m_text_program;
 			unsigned int m_texture_program;
-			unsigned int m_current_program;
+			unsigned int m_knob_program;
 			
 			unsigned int m_font_atlas;
 			unsigned int m_text_vertex_buffer;
@@ -69,7 +70,9 @@ namespace dim {
 			int createShader(const std::string &vertex_shader_file, const std::string &fragment_shader_file);
 			unsigned int create_2d_float_vertex_buffer_simple(size_t size, custom_array<float> &data);
 			void update_buffer(unsigned int buffer, size_t size, custom_array<float> &data);
+			
 			unsigned int get_base_program() { return this->m_base_program; }
+			unsigned int get_knob_program() { return this->m_knob_program; }
 			
 			unsigned int create_texture(uint8_t *data, int width, int height, int bpp, int channels);
 			

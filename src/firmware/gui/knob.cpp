@@ -20,6 +20,7 @@ knob::knob(renderer &renderer, float x, float y, float size)
 	this->m_shape->set_background_color(this->m_bg_color);
 	this->m_shape->set_stroke_color(this->m_fg_color);
 	this->m_shape->set_stroke_weight(2);
+	this->m_shape->set_special_program(renderer.get_knob_program());
 	
 	// create knob shape
 	m_knob.set_texture(new texture(renderer, "rotary_knob"));
