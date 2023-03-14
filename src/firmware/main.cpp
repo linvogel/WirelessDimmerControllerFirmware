@@ -14,6 +14,7 @@
 #include "gui/panel.hpp"
 #include "gui/slider.hpp"
 #include "gui/knob.hpp"
+#include "gui/label.hpp"
 
 using namespace dim::gui;
 using namespace dim::in;
@@ -57,11 +58,14 @@ int main()
 	
 	knob kn1(renderer, 500, 100, 100);
 	
+	label lbl1(renderer, 100, 400, 200, 30, "hello, world", 16);
+	
 	panel pnl1(renderer, 100, 100, 170, 90);
 	
 	window.add(&kn1);
 	window.add(&pnl1);
 	window.add(&sld1);
+	window.add(&lbl1);
 	pnl1.add(&btn1);
 	pnl1.add(&btn2);
 	
