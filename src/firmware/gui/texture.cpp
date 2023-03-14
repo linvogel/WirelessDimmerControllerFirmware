@@ -13,6 +13,7 @@ using namespace dim::gui;
 
 texture::texture(renderer &renderer, std::string texture_name)
 {
+	debug("Creating texture: %s", texture_name.c_str());
 	int n_width, n_height, n_bpp;
 	uint8_t *data = stbi_load(("textures/" + texture_name + "_base.png").c_str(), &(this->m_width), &(this->m_height), &(this->m_bpp), 4);
 	this->m_base_texture = renderer.create_texture(data, this->m_width, this->m_height, this->m_bpp, 4);

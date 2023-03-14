@@ -72,6 +72,7 @@ namespace dim {
 			void update_buffer(unsigned int buffer, size_t size, custom_array<float> &data);
 			
 			unsigned int get_base_program() { return this->m_base_program; }
+			unsigned int get_texture_program() { return this->m_texture_program; }
 			unsigned int get_knob_program() { return this->m_knob_program; }
 			
 			void set_program(unsigned int program);

@@ -8,7 +8,7 @@ namespace dim {
 		
 		class slider : public virtual component {
 			quad2 m_rail;
-			quad2 m_knob;
+			textured_quad2 m_knob;
 			
 			dim::math::vector4f m_drag_col;
 			

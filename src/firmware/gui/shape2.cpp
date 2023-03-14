@@ -179,7 +179,7 @@ textured_quad2::textured_quad2(renderer &renderer, vector2f a, vector2f b, vecto
 
 textured_quad2::~textured_quad2()
 {
-	if (this->m_texture) std::free(this->m_texture);
+	if (this->m_texture) delete this->m_texture;
 }
 
 void textured_quad2::set_texture(texture *texture)

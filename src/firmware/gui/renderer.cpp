@@ -609,7 +609,6 @@ void renderer::set_uniform_vec2(unsigned int program, const char* name, float *v
 {
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
-	verbose("Pointer: %p, location: %d, name: %s", value, location, name);
 	GL_CALL(glUniform2fv(location, 1, value));
 }
 

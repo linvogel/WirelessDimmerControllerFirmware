@@ -32,10 +32,8 @@ slider::slider(renderer &renderer, float x, float y, float w, float h, float min
 	this->m_rail.set_corner_radius(5);
 	this->m_rail.set_stroke_weight(2);
 	
-	this->m_knob.set_background_color(this->m_bg_color);
-	this->m_knob.set_stroke_color(this->m_fg_color);
-	this->m_knob.set_corner_radius(5);
-	this->m_knob.set_stroke_weight(2);
+	this->m_knob.set_texture(new texture(renderer, "fader_knob"));
+	this->m_knob.update_uv();
 	
 	this->m_min_value = min_val;
 	this->m_max_value = max_val;
@@ -57,7 +55,7 @@ void slider::draw_component(renderer &renderer)
 	float knob_y = 5;
 	
 	this->m_rail.set_offset(this->m_shape->get_offset()(0) + rail_x, this->m_shape->get_offset()(1) - rail_y);
-	this->m_knob.set_offset(this->m_shape->get_offset()(0) + knob_x, this->m_shape->get_offset()(1) - 215 + this->m_pos);
+	this->m_knob.set_offset(this->m_shape->get_offset()(0) + knob_x, this->m_shape->get_offset()(1));
 	
 	renderer.push_proj();
 	renderer.translate({rail_x, rail_y}, true);
