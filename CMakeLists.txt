@@ -27,6 +27,8 @@ project(DimmerControllerFirmware)
 	file(GLOB_RECURSE MAIN_SOURCES src/firmware/*.cpp)
 	include_directories(src/glew/include glfw/include src/firmware freetype/include include)
 	
+	add_subdirectory(yaml-cpp)
+	
 	if("${TARGET}" STREQUAL "local")
 		add_definitions(-DGLEW_BUILD -DGLEW_STATIC)
 		add_subdirectory(src/glew)
@@ -42,6 +44,7 @@ project(DimmerControllerFirmware)
 	
 	add_executable(firmware ${MAIN_SOURCES})
 	target_link_libraries(firmware PUBLIC ${LIBRARIES})
+	target_link_libraries(firmware PUBLIC yaml-cpp)
 	
 	if("${TARGET}" STREQUAL "local")
 		#target_link_directories(firmware PUBLIC $<TARGET_FILE_DIR:glfw> $<TARGET_FILE_DIR:GLEW>)
