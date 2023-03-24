@@ -5,6 +5,7 @@
 		"src/glew/include",
 		"src/firmware",
 		"lib/include",
+		"yaml-cpp/include",
 		"include"
 	],
 	"C_Cpp.default.defines": [

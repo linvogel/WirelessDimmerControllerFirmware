@@ -5,7 +5,3 @@ build/
 
 glfw/
 freetype/
-
-# Added by cargo
-
-/target
