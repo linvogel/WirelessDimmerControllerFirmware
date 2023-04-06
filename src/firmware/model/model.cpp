@@ -2,7 +2,7 @@
 
 using namespace dim::model;
 
-
+model_value::model_value() : m_value(0ULL), m_model(nullptr), m_name(std::string()) {}
 model_value::model_value(void *model, std::string name) : m_value(0ULL), m_model(model), m_name(name) {}
 
 model_value::~model_value() {}
@@ -27,9 +27,9 @@ model_value& model_value::operator=(T value)
 model::model() {}
 model::~model() {}
 
-model_value& model::operator[](std::string &name)
+model_value& model::operator[](const std::string &name)
 {
-	if (!this->m_values.contains(name)) this->m_values.insert(std::make_pair(name, model_value(this, name)));
+	if (this->m_values.find(name) == this->m_values.end()) this->m_values.insert(std::make_pair(name, model_value(this, name)));
 	return this->m_values[name];
 }
 

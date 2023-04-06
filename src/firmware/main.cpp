@@ -16,6 +16,8 @@
 #include "gui/knob.hpp"
 #include "gui/label.hpp"
 
+#include "gui/guibuilder.hpp"
+
 using namespace dim::gui;
 using namespace dim::in;
 
@@ -70,6 +72,8 @@ int main()
 	pnl1.add(&btn2);
 	
 	renderer.set_swap_interval(1);
+	
+	component *ret = dim::gui_builder::build_gui_from_file(std::string("test.yml"));
 	
 	while (!window.shoud_close()) {
 		//trace("Render cycle...");

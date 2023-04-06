@@ -18,6 +18,7 @@ namespace dim {
 			std::string m_name;
 			
 		public:
+			model_value();
 			model_value(void *model, std::string name);
 			~model_value();
 			
@@ -43,7 +44,7 @@ namespace dim {
 			
 			void register_update_function(std::string &name, std::function<void()> func);
 			
-			model_value& operator[](std::string &name);
+			model_value& operator[](const std::string &name);
 		};
 	}
 }
