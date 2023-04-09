@@ -8,8 +8,7 @@
 namespace dim {
 	namespace gui_builder {
 		
-		dim::gui::component* build_gui_from_yaml(YAML::Node gui_node);
-		dim::gui::component* build_gui_from_file(const std::string &filename);
-		
+		dim::gui::component* build_gui_from_file(dim::gui::renderer &renderer, const std::string &filename);
+		dim::gui::component* build_gui_from_yaml(dim::gui::renderer &renderer, YAML::Node gui_node);
 	}
 }

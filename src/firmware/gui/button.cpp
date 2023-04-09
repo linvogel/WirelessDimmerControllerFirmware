@@ -6,8 +6,11 @@
 #define MODULE_NAME "button"
 #include "../logging.hpp"
 
+#include "guibuilder.hpp"
+
 using namespace dim::gui;
 using namespace dim::math;
+using namespace dim::gui_builder;
 
 button::button(std::string text, std::function<void(void)> func, renderer &renderer, float x, float y, float w, float h)
 	: component(x, y, 1.0f, 1.0f, 0.0f, w, h), m_func(func), m_text(text), m_renderer(renderer)
@@ -41,4 +44,20 @@ void button::onLeftMouseUp(float x, float y)
 	this->m_shape->set_background_color(this->m_bg_color);
 	if (0 <= x && 0 <= y && this->m_size(0) >= x && this->m_size(1) >= y)
 		if (this->m_func) this->m_func();
+}
+
+component* button::from_yaml(renderer &renderer, YAML::Node root)
+{
+	debug("building button...");
+	// read position
+	float x = root["bounds"]["x"].as<float>();
+	float y = root["bounds"]["y"].as<float>();
+	float w = root["bounds"]["w"].as<float>();
+	float h = root["bounds"]["h"].as<float>();
+	
+	std::string text = root["text"].as<std::string>();
+	
+	button* btn = new button(text, [&](){ info("Pressed button: "); }, renderer, x, y, w, h);
+	
+	return btn;
 }

@@ -17,6 +17,8 @@ namespace dim {
 		public:
 			button(std::string text, std::function<void(void)> func, renderer &renderer, float x, float y, float w, float h);
 			
+			static component* from_yaml(renderer &renderer, YAML::Node root);
+			
 			virtual void draw_component(renderer &renderer) override;
 			
 			virtual void onLeftMouseDown(float x, float y) override;

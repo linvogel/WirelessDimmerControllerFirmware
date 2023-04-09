@@ -3,49 +3,49 @@
 #define MODULE_NAME "config"
 #include "../logging.hpp"
 
+#include <fstream>
+
 using namespace dim;
 
-cfg_value::cfg_value(YAML::Node value)
-{
-	this->m_value = value;
-}
 
-template<typename T>
-cfg_value::operator T()
+configuration::configuration(std::string filename)
 {
-	if (!this->m_value.IsScalar()) {
-		error("cannot convert YAML node to scalar value");
-		return T();
+	this->m_filename = filename;
+	try {
+		this->m_values = YAML::LoadFile(filename);
+	} catch (const std::exception e) {
+		warn("Configuration file '%s' could not be loaded!", filename.c_str());
+		this->m_values = YAML::Node();
 	}
-	
-	return this->m_value.as<T>();
+}
+
+configuration::~configuration()
+{
+	std::ofstream out(this->m_filename);
+	out << this->m_values;
+	out.flush();
+	out.close();
 }
 
 template<typename T>
-T& cfg_value::operator[](std::string name)
+T configuration::operator()(std::string name, T value)
 {
-	if (!this->m_value.IsMap()) {
-		error("YAML node is not a map");
-		return T();
+	trace("CONFIG LOOKUP: %s", name.c_str());
+	// walk through the path
+	YAML::Node current = this->m_values;
+	std::string cname = name;
+	size_t found = std::string::npos;
+	while ((found = cname.find('.')) != std::string::npos) {
+		trace("CONFIG LOOKUP ITER: %s <==> %s", cname.c_str(), cname.substr(0, found));
+		if (!current[cname.substr(0, found)]) {
+			current[cname.substr(0, found)] = YAML::Node();
+		}
+		current = current[cname.substr(0, found)];
+		cname = cname.substr(found + 1, cname.size() - found - 1);
 	}
+	trace("CONFIG LOOKUP FINAL: %s", cname.c_str());
+	if (current[cname]) return current[cname].as<T>()
 	
-	return this->m_value[name].as<T>();
-}
-
-template<typename T>
-T& cfg_value::operator[](size_t idx)
-{
-	if (!this->m_value.IsSequence()) {
-		error("YAML node is not a sequence");
-		return T();
-	}
-	
-	return this->m_value[idx];
-}
-
-template<typename T>
-cfg_value& cfg_value::operator=(T& value)
-{
-	this->m_value.Assign(value);
-	return *this;
+	current[cname] = value;
+	return value;
 }

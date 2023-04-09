@@ -5,9 +5,18 @@
 #define MODULE_NAME "GUI_BUILDER"
 #include "../logging.hpp"
 
+#include "panel.hpp"
+#include "button.hpp"
+#include "knob.hpp"
+#include "slider.hpp"
+#include "label.hpp"
 
-dim::gui::component* dim::gui_builder::build_gui_from_file(const std::string &filename)
+using namespace dim::gui;
+
+
+dim::gui::component* dim::gui_builder::build_gui_from_file(renderer &renderer, const std::string &filename)
 {
+	debug("build from file");
 	try {
 		std::vector<YAML::Node> nodes = YAML::LoadAllFromFile(filename);
 		
@@ -16,26 +25,41 @@ dim::gui::component* dim::gui_builder::build_gui_from_file(const std::string &fi
 			return nullptr;
 		}
 		
-		if (nodes.size() > 1) {
-			warn("Multiple yaml nodes in gui file, uncertain if choosing the correct one!");
+		int i = -1;
+		for (int k = 0; k < nodes.size(); k++) {
+			if (nodes[k]["gui"]) {
+				if (i != -1) warn("Multiple yaml nodes in gui file, uncertain if choosing the correct one!");
+				else i = k;
+			}
 		}
 		
-		return build_gui_from_yaml(nodes[0]);
+		if (i == -1) {
+			error("Gui file does not contain valid gui node: %s", filename.c_str());
+			return nullptr;
+		}
+		
+		return build_gui_from_yaml(renderer, nodes[i]["gui"]);
 		
 	} catch (std::exception e) {
-		error("Unable to build gui from file: %s", filename);
+		error("Unable to build gui from file: %s", filename.c_str());
+		error("Error: %s", e.what());
 		return nullptr;
 	}
 }
 
-dim::gui::component* dim::gui_builder::build_gui_from_yaml(YAML::Node gui_node)
+dim::gui::component* dim::gui_builder::build_gui_from_yaml(renderer &renderer, YAML::Node root)
 {
-	if (!gui_node.IsMap()) {
+	debug("build from yaml");
+	std::cout << "Root: " << root << std::endl;
+	if (!root.IsMap()) {
 		error("Gui Node must be of map type!");
 		return nullptr;
 	}
 	
-	for (YAML::iterator it = gui_node.begin(); it != gui_node.end(); ++it) {
-		info("Tag: %s", it->Tag().c_str());
+	std::string type = root["type"].as<std::string>();
+	if (type == "panel") {
+		return panel::from_yaml(renderer, root);
+	} else if (type == "button") {
+		return button::from_yaml(renderer, root);
 	}
 }

@@ -83,3 +83,9 @@ bool component::hit(float local_x, float local_y)
 			this->m_position(0) + this->m_size(0) >= local_x &&
 			this->m_position(1) + this->m_size(1) >= local_y;
 }
+
+component* component::from_yaml(renderer &renderer, YAML::Node root)
+{
+	error("Generic component may not be instantiated from YAML!");
+	return nullptr;
+}

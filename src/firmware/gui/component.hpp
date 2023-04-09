@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include <iostream>
+#include <yaml-cpp/yaml.h>
 
 #include "../math/matrix.hpp"
 #include "renderer.hpp"
@@ -38,6 +38,8 @@ namespace dim {
 			component(vector2f pos, vector2f scale, float angle, vector2f size);
 			component(float x, float y, float scalex, float scaley, float angle, float sizex, float sizey) : component({x, y}, {scalex, scaley}, angle, {sizex, sizey}) {}
 			~component() = default;
+			
+			static component* from_yaml(renderer &renderer, YAML::Node root);
 			
 			/**
 			 * @brief Get the parent component
