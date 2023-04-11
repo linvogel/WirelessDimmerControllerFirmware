@@ -44,7 +44,7 @@ T configuration::operator()(std::string name, T value)
 		cname = cname.substr(found + 1, cname.size() - found - 1);
 	}
 	trace("CONFIG LOOKUP FINAL: %s", cname.c_str());
-	if (current[cname]) return current[cname].as<T>()
+	if (current[cname]) return current[cname].as<T>(); // Note: this semicolon is correct, even if the msvc compiler doesn't seem to care about its absence???
 	
 	current[cname] = value;
 	return value;

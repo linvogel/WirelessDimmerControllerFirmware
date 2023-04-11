@@ -50,7 +50,6 @@ dim::gui::component* dim::gui_builder::build_gui_from_file(renderer &renderer, c
 dim::gui::component* dim::gui_builder::build_gui_from_yaml(renderer &renderer, YAML::Node root)
 {
 	debug("build from yaml");
-	std::cout << "Root: " << root << std::endl;
 	if (!root.IsMap()) {
 		error("Gui Node must be of map type!");
 		return nullptr;
@@ -61,5 +60,15 @@ dim::gui::component* dim::gui_builder::build_gui_from_yaml(renderer &renderer, Y
 		return panel::from_yaml(renderer, root);
 	} else if (type == "button") {
 		return button::from_yaml(renderer, root);
+	} else if (type == "knob") {
+		return knob::from_yaml(renderer, root);
+	} else if (type == "label") {
+		return label::from_yaml(renderer, root);
+	} else if (type == "slider") {
+		return slider::from_yaml(renderer, root);
 	}
+	
+	
+	warn("Unhandled type: %s", type.c_str());
+	return nullptr;
 }

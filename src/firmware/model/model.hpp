@@ -7,15 +7,18 @@
 
 namespace dim {
 	namespace model {
+		class model;
 		
 		/**
 		 * @brief The model_value class stores primitive values inside a model
 		 * 
 		 */
 		class model_value {
+			friend model;
 			uint64_t m_value;
 			void *m_model;
 			std::string m_name;
+			std::vector<std::function<void()>> m_funcs;
 			
 		public:
 			model_value();
@@ -36,7 +39,6 @@ namespace dim {
 		 */
 		class model {
 			std::map<std::string, model_value> m_values;
-			std::map<std::string, std::vector<std::function<void()>>> m_update_funcs;
 			
 		public:
 			model();

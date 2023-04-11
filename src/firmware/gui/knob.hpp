@@ -23,6 +23,8 @@ namespace dim {
 		public:
 			knob(renderer &renderer, float x, float y, float size);
 			
+			static component* from_yaml(renderer &renderer, YAML::Node root);
+			
 			virtual void draw_component(renderer &renderer) override;
 			
 			virtual void onLeftMouseDown(float x, float y) override;

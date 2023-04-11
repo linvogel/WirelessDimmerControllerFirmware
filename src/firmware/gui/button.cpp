@@ -12,7 +12,7 @@ using namespace dim::gui;
 using namespace dim::math;
 using namespace dim::gui_builder;
 
-button::button(std::string text, std::function<void(void)> func, renderer &renderer, float x, float y, float w, float h)
+button::button(std::string text, std::function<void()> func, renderer &renderer, float x, float y, float w, float h)
 	: component(x, y, 1.0f, 1.0f, 0.0f, w, h), m_func(func), m_text(text), m_renderer(renderer)
 {
 	this->m_act_color = vector4f({0.0f, 0.218f, 0.411f, 1.0f});
@@ -46,6 +46,11 @@ void button::onLeftMouseUp(float x, float y)
 		if (this->m_func) this->m_func();
 }
 
+void button::set_callback(std::function<void()> func)
+{
+	this->m_func = func;
+}
+
 component* button::from_yaml(renderer &renderer, YAML::Node root)
 {
 	debug("building button...");
@@ -57,7 +62,7 @@ component* button::from_yaml(renderer &renderer, YAML::Node root)
 	
 	std::string text = root["text"].as<std::string>();
 	
-	button* btn = new button(text, [&](){ info("Pressed button: "); }, renderer, x, y, w, h);
-	
+	button* btn = new button(text, []() { info("Uninitialized button function!"); }, renderer, x, y, w, h);
+	btn->set_callback([btn]() { info("Button pressed: '%s'", btn->m_text.c_str()); });
 	return btn;
 }

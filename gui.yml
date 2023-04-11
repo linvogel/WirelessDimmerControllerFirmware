@@ -1,0 +1,57 @@
+gui:
+    type: panel
+    bounds:
+        x: 0
+        y: 0
+        w: 800
+        h: 480
+    children:
+        btn1:
+            type: button
+            bounds:
+                x: 10
+                y: 10
+                w: 150
+                h: 30
+            text: some button
+        btn2:
+            type: button
+            bounds:
+                x: 10
+                y: 50
+                w: 150
+                h: 30
+            text: other
+        knb1:
+            type: knob
+            bounds:
+                x: 250
+                y: 100
+                size: 100
+        knb2:
+            type: knob
+            bounds:
+                x: 250
+                y: 250
+                size: 100
+        lbl1:
+            type: label
+            bounds:
+                x: 400
+                y: 10
+                w: 300
+                h: 30
+            text: This is some text
+            font_size: 16
+        sld1:
+            type: slider
+            bounds:
+                x: 400
+                y: 50
+                w: 50
+                h: 300
+            min_value: 0
+            max_value: 1
+            rail_width: 5
+            knob_width: 40
+            knob_height: 60

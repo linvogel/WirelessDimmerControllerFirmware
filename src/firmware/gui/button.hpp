@@ -15,9 +15,11 @@ namespace dim {
 			
 			vector4f m_act_color;
 		public:
-			button(std::string text, std::function<void(void)> func, renderer &renderer, float x, float y, float w, float h);
+			button(std::string text, std::function<void()> func, renderer &renderer, float x, float y, float w, float h);
 			
 			static component* from_yaml(renderer &renderer, YAML::Node root);
+			
+			virtual void set_callback(std::function<void()> func);
 			
 			virtual void draw_component(renderer &renderer) override;
 			

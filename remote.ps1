@@ -5,7 +5,7 @@ Set-Variable -Name BUILD_DIR -Value .\bin
 # sync to target
 New-Item -Force -ItemType "directory" $BUILD_DIR
 if ([System.IO.File]::Exists($BUILD_DIR)) { Remove-Item -Force $BUILD_DIR\source.tar }
-tar.exe -c -f $BUILD_DIR\source.tar .\glfw .\src .\CMakeLists.txt .\shaders .\fonts .\include .\textures
+tar.exe -c -f $BUILD_DIR\source.tar .\glfw .\yaml-cpp .\src .\CMakeLists.txt .\shaders .\fonts .\include .\textures
 ssh linvogel "rm -rf ~/workspace/wireless_firmware_remote/*"
 ssh linvogel "mkdir -p ~/workspace/wireless_firmware_remote/src"
 ssh linvogel "mkdir -p ~/workspace/wireless_firmware_remote/bin"

@@ -89,3 +89,21 @@ void slider::onLeftMouseUp(float x, float y)
 	this->m_grabbed = false;
 		this->m_knob.set_background_color(this->m_bg_color);
 }
+
+component* slider::from_yaml(renderer &renderer, YAML::Node root)
+{
+	float x = root["bounds"]["x"].as<float>();
+	float y = root["bounds"]["y"].as<float>();
+	float w = root["bounds"]["w"].as<float>();
+	float h = root["bounds"]["h"].as<float>();
+	
+	float min_val = root["min_value"].as<float>();
+	float max_val = root["max_value"].as<float>();
+	float rail_width = root["rail_width"].as<float>();
+	float knob_width = root["knob_width"].as<float>();
+	float knob_height = root["knob_height"].as<float>();
+		
+	slider *sld = new slider(renderer, x, y, w, h, min_val, max_val, rail_width, knob_width, knob_height);
+	
+	return sld;
+}

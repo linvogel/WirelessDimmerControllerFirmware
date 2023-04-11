@@ -71,10 +71,10 @@ int main()
 	//pnl1.add(&btn1);
 	//pnl1.add(&btn2);
 	
-	renderer.set_swap_interval(1);
-	
-	component *content = dim::gui_builder::build_gui_from_file(renderer, "test.yml");
+	component *content = dim::gui_builder::build_gui_from_file(renderer, "gui.yml");
 	window.add(content);
+	
+	renderer.set_swap_interval(1);
 	
 	while (!window.shoud_close()) {
 		//trace("Render cycle...");

@@ -19,7 +19,7 @@ model_value& model_value::operator=(T value)
 	// assign value
 	this->m_value = (uint64_t)value;
 	// invoke update hooks
-	for (std::function<void()> f : ((model*)(this->m_model))->m_update_funcs[this->m_name]) f();
+	for (std::function<void()> f : ((model*)this->m_model)->m_values[this->m_name].m_funcs) f();
 	return *this;
 }
 
@@ -35,5 +35,7 @@ model_value& model::operator[](const std::string &name)
 
 void model::register_update_function(std::string &name, std::function<void()> func)
 {
-	this->m_update_funcs[name].push_back(func);
+	if (this->m_values[name]) {
+		this->m_values[name].m_funcs.push_back(func);
+	}
 }
