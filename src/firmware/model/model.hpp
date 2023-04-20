@@ -42,6 +42,7 @@ namespace dim {
 			
 		public:
 			model();
+			model(std::string filename);
 			~model();
 			
 			void register_update_function(std::string &name, std::function<void()> func);

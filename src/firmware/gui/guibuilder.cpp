@@ -16,7 +16,6 @@ using namespace dim::gui;
 
 dim::gui::component* dim::gui_builder::build_gui_from_file(renderer &renderer, const std::string &filename)
 {
-	debug("build from file");
 	try {
 		std::vector<YAML::Node> nodes = YAML::LoadAllFromFile(filename);
 		
@@ -49,7 +48,6 @@ dim::gui::component* dim::gui_builder::build_gui_from_file(renderer &renderer, c
 
 dim::gui::component* dim::gui_builder::build_gui_from_yaml(renderer &renderer, YAML::Node root)
 {
-	debug("build from yaml");
 	if (!root.IsMap()) {
 		error("Gui Node must be of map type!");
 		return nullptr;

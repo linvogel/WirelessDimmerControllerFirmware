@@ -18,8 +18,11 @@
 
 #include "gui/guibuilder.hpp"
 
+#include "model/model.hpp"
+
 using namespace dim::gui;
 using namespace dim::in;
+using namespace dim::model;
 
 
 int main()
@@ -70,6 +73,8 @@ int main()
 	//window.add(&lbl1);
 	//pnl1.add(&btn1);
 	//pnl1.add(&btn2);
+	
+	model *data_model = new model("model.yml");
 	
 	component *content = dim::gui_builder::build_gui_from_file(renderer, "gui.yml");
 	window.add(content);

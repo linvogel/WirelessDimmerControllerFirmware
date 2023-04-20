@@ -108,7 +108,8 @@
 		"any": "cpp",
 		"queue": "cpp",
 		"stack": "cpp",
-		"valarray": "cpp"
+		"valarray": "cpp",
+		"hash_map": "cpp"
 	},
 	"C_Cpp.default.cppStandard": "c++23",
 	"C_Cpp.default.cStandard": "c17",
