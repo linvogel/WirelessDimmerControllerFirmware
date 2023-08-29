@@ -11,7 +11,7 @@ namespace dim {
 			
 		public:
 			device(size_t memory_size);
-			~device() = default;
+			~device();
 			
 			virtual void set_value8(size_t address, uint8_t value);
 			virtual void set_value16(size_t address, uint16_t value);

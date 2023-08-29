@@ -18,6 +18,8 @@
 
 #include "gui/guibuilder.hpp"
 
+#include "gui/keyboard_view.hpp"
+
 #include "model/model.hpp"
 
 using namespace dim::gui;
@@ -32,13 +34,12 @@ int main()
 	
 	/**
 	 * TODO:
-	 *  - Start model thread
-	 *  - Start Interface Thread
 	 *  - Start View Thread
+	 *  - Start Controller Thread
 	 *  - monitor activity
 	 *  - wait for other threads
 	 * 
-	 * This will be the architecture later when model, view and interface threads are ready themselves
+	 * This will be the architecture later when view and controller threads are ready themselves
 	 * 
 	 */
 	
@@ -74,10 +75,7 @@ int main()
 	//pnl1.add(&btn1);
 	//pnl1.add(&btn2);
 	
-	model *data_model = new model("model.yml");
-	
-	component *content = dim::gui_builder::build_gui_from_file(renderer, "gui.yml");
-	window.add(content);
+	keyboard_view kbd_view(&window);
 	
 	renderer.set_swap_interval(1);
 	

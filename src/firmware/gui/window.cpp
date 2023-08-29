@@ -41,6 +41,10 @@ window::window(std::string name, int width, int height)
 	// setup colors
 	// TODO: this should be read from the configuration
 	
+	// setup scene 0
+	this->m_scenes.push_back(std::vector<dim::gui::component*>());
+	this->m_scene = 0;
+	
 	this->m_shape = std::make_shared<quad2>(*(this->m_renderer), 0.0f, 0.0f, 800.0f, 0.0f, 800.0f, 480.0f, 0.0f, 480.0f);
 	this->m_shape->set_background_color(this->m_bg_color);
 		
@@ -63,4 +67,34 @@ void window::draw_component(renderer &renderer)
 int window::shoud_close()
 {
 	return glfwWindowShouldClose(this->m_window);
+}
+
+void window::add(dim::gui::component *child)
+{
+	this->dim::gui::component::add(child);
+	this->m_scenes[this->m_scene].push_back(child);
+}
+
+void window::remove_child(dim::gui::component *child)
+{
+	this->dim::gui::component::remove_child(child);
+	for (int64_t i = this->m_scenes[this->m_scene].size()-1; i >= 0; i--) {
+		if (this->m_scenes[this->m_scene][i] == child) {
+			this->m_scenes[this->m_scene].erase(this->m_scenes[this->m_scene].begin()+i);
+		}
+	}
+}
+
+void window::set_scene(size_t scene)
+{
+	this->m_children.clear();
+	this->m_scene = scene;
+	this->m_children.insert(this->m_children.begin(), this->m_scenes[this->m_scene].begin(), this->m_scenes[this->m_scene].end());
+}
+
+size_t window::create_scene()
+{
+	size_t out = this->m_scenes.size();
+	this->m_scenes.push_back(std::vector<dim::gui::component*>());
+	return out;
 }

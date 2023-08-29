@@ -21,6 +21,8 @@ namespace dim {
 			GLFWwindow *m_window;
 			std::shared_ptr<renderer> m_renderer;
 			std::shared_ptr<dim::in::input_controller> m_input_ctrl;
+			std::vector<std::vector<dim::gui::component*>> m_scenes;
+			size_t m_scene;
 			
 		public:
 			/**
@@ -39,6 +41,13 @@ namespace dim {
 			renderer &get_renderer() { return *(this->m_renderer); };
 			dim::in::input_controller &get_input_ctrl() { return *(this->m_input_ctrl); };
 			int shoud_close();
+			
+			// scene related functions and overrides
+			virtual void add(dim::gui::component *child) override;
+			virtual void remove_child(dim::gui::component *child) override;
+			void set_scene(size_t scene);
+			size_t get_scene() { return this->m_scene; };
+			size_t create_scene();
 			
 		};
 		

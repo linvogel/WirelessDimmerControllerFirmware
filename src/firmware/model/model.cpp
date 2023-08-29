@@ -84,7 +84,7 @@ model_value& model::operator[](const std::string &name)
 	return this->m_values[name];
 }
 
-void model::register_update_function(std::string &name, std::function<void()> func)
+void model::register_update_function(std::string &name, std::function<void(uint64_t)> func)
 {
 	if (this->m_values[name]) {
 		this->m_values[name].m_funcs.push_back(func);

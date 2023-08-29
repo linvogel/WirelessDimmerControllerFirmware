@@ -18,7 +18,7 @@ namespace dim {
 			uint64_t m_value;
 			void *m_model;
 			std::string m_name;
-			std::vector<std::function<void()>> m_funcs;
+			std::vector<std::function<void(uint64_t)>> m_funcs;
 			
 		public:
 			model_value();
@@ -45,7 +45,7 @@ namespace dim {
 			model(std::string filename);
 			~model();
 			
-			void register_update_function(std::string &name, std::function<void()> func);
+			void register_update_function(std::string &name, std::function<void(uint64_t)> func);
 			
 			model_value& operator[](const std::string &name);
 		};
