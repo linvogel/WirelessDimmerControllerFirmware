@@ -9,8 +9,14 @@
 #include <string>
 #include <memory>
 
+#include <gui/onscreen_keyboard.hpp>
+
 namespace dim {
+	namespace model {
+		class model;
+	};
 	namespace gui {
+		class onscreen_keyboard;
 		
 		/**
 		 * @brief Unique window class to be used in this firmware. Only a single instance of this window may be created.
@@ -23,6 +29,8 @@ namespace dim {
 			std::shared_ptr<dim::in::input_controller> m_input_ctrl;
 			std::vector<std::vector<dim::gui::component*>> m_scenes;
 			size_t m_scene;
+			std::vector<size_t> m_scene_stack;
+			onscreen_keyboard* m_onscreen_kbd;
 			
 		public:
 			/**
@@ -49,6 +57,10 @@ namespace dim {
 			size_t get_scene() { return this->m_scene; };
 			size_t create_scene();
 			
+			void push_scene(size_t scene);
+			void pop_scene();
+			
+			void show_keyboard(model::model_value *value);
 		};
 		
 	}

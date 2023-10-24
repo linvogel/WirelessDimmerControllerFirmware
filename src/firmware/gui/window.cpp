@@ -1,9 +1,6 @@
 #include "window.hpp"
 #include "../errors.hpp"
 
-#ifdef MODULE_NAME
-#undef MODULE_NAME
-#endif
 #define MODULE_NAME "window"
 #include "../logging.hpp"
 
@@ -49,6 +46,9 @@ window::window(std::string name, int width, int height)
 	this->m_shape->set_background_color(this->m_bg_color);
 		
 	this->m_size = this->m_shape->get_size();
+	
+	// prepare onscreen keyboard
+	this->m_onscreen_kbd = new onscreen_keyboard(this);
 }
 
 window::~window()
@@ -97,4 +97,21 @@ size_t window::create_scene()
 	size_t out = this->m_scenes.size();
 	this->m_scenes.push_back(std::vector<dim::gui::component*>());
 	return out;
+}
+
+void window::push_scene(size_t scene)
+{
+	this->m_scene_stack.push_back(scene);
+	this->set_scene(scene);
+}
+
+void window::pop_scene()
+{
+	this->m_scene_stack.pop_back();
+	this->set_scene(this->m_scene_stack.back());
+}
+
+void window::show_keyboard(model::model_value *value)
+{
+	this->m_onscreen_kbd->show(value);
 }

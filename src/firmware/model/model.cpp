@@ -3,90 +3,91 @@
 #define MODULE_NAME "model"
 #include "../logging.hpp"
 
-#include <vector>
-#include <yaml-cpp/yaml.h>
-
 using namespace dim::model;
 
-model_value::model_value() : m_value(0ULL), m_model(nullptr), m_name(std::string()) {}
-model_value::model_value(void *model, std::string name) : m_value(0ULL), m_model(model), m_name(name) {}
 
-model_value::~model_value() {}
+model::model() : m_root("root", nullptr) {}
 
-template<typename T>
-model_value::operator T()
+
+
+const bool model::is_valid_name(const std::string &name)
 {
-	return (T)this->m_value;
-}
-
-template<typename T>
-model_value& model_value::operator=(T value)
-{
-	// assign value
-	this->m_value = (uint64_t)value;
-	// invoke update hooks
-	for (std::function<void()> f : ((model*)this->m_model)->m_values[this->m_name].m_funcs) f();
-	return *this;
-}
-
-
-model::model() {}
-
-model::model(std::string filename)
-{
-	try {
-		info("Loading model: %s", filename.c_str());
-		std::vector<YAML::Node> all_nodes = YAML::LoadAllFromFile(filename);
-		
-		if (all_nodes.size() == 0)
-			throw std::runtime_error("No data in model file");
-		
-		
-		int k = -1;
-		for (int i = 0; i < all_nodes.size(); i++) {
-			if (all_nodes[i]["model"]) {
-				if (k != -1) warn("Multiple model nodes, uncertain if choosing the correct one!");
-				k = i;
-			}
-		}
-		YAML::Node parent_node = all_nodes[k];
-		
-		if (!parent_node.IsMap())
-			throw std::runtime_error("Malformed model: parent node must be of map type!");
-		
-		if (!parent_node["model"])
-			throw std::runtime_error("Malformed model: root node not present!");
-		
-		YAML::Node value_map = parent_node["model"];
-		std::cout << "Full data: " << std::endl << parent_node["model"] << std::endl;
-		for (auto it = value_map.begin();  it != value_map.end(); ++it) {
-			std::string value_name = it->first.as<std::string>();
-			model_value(this, value_name);
-		}
-		
-		
-	} catch (YAML::BadFile e) {
-		error("Failed to load module file: %s", filename.c_str());
-	} catch (std::runtime_error e) {
-		error("Error parsing model file: %s", filename.c_str());
-		error(e.what());
+	auto is_ascii_lower = [](char c) { return c >= 'a' && c <= 'z'; };
+	auto is_ascii_upper = [](char c) { return c >= 'A' && c <= 'Z'; };
+	auto is_ascii_digit = [](char c) { return c >= '0' && c <= '9'; };
+	auto is_ascii_sym = [](char c) { return c == '_' || c == '-' || c == '.'; };
+	for (char c : name) {
+		if (!(is_ascii_lower(c) || is_ascii_upper(c) || is_ascii_digit(c) || is_ascii_sym(c))) return false;
 	}
+	
+	for (size_t i = 0; i < name.size()-1; i++) {
+		if (name.at(i) == '.' && name.at(i) == '.') return false;
+	}
+	
+	return true;
 }
 
-model::~model() {}
+const std::vector<std::string> separate(const std::string &name)
+{
+	std::vector<std::string> names;
+	
+	size_t off = 0;
+	size_t end = 0;
+	while (off < name.size() && end < name.size()) {
+		end = name.find_first_of('.', off);
+		if (end == std::string::npos) {
+			names.push_back(name.substr(off));
+			break;
+		}
+		names.push_back(name.substr(off, end - off));
+	}
+	
+	return names;
+}
+
+const bool model::table_walk(std::vector<std::string> &names, model_node **retval)
+{
+	model_node *current = &(this->m_root);
+	
+	for (size_t i = 0; i < names.size()-1; i++) {
+		if (current->m_nodes.find(names[i]) != current->m_nodes.end()) {
+			// this node exists as a child of current
+			current = &(current->m_nodes.at(names[i]));
+		} else {
+			// this node does not exist as a child of current
+			*retval = nullptr;
+			return false;
+		}
+	}
+	
+	*retval = current;
+	return true;
+}
+
+
+template<typename T>
+bool model::add(const std::string name, T value)
+{
+	return true;
+}
+
+
 
 model_value& model::operator[](const std::string &name)
 {
-	if (this->m_values.find(name) == this->m_values.end()) {
-		error("No such model value: %s", name.c_str());
-		throw std::runtime_error("invalid model value");
+	model_node *node;
+	std::vector<std::string> names = this->separate(name);
+	bool success = this->table_walk(names, &node);
+	
+	if (!success) {
+		error("Model tablewalk failed!");
+		throw std::runtime_error("model tablewalk failed");
 	}
-	return this->m_values[name];
-}
-
-void model::register_update_function(std::string &name, std::function<void(uint64_t)> func)
-{
-	if (this->m_values[name]) {
-		this->m_values[name].m_funcs.push_back(func);
+	
+	if (node->m_values.find(names.back()) == node->m_values.end()) {
+		error("model does not contain leaf node: '%s'", names.back().c_str());
+		throw std::runtime_error("model does not contain leaf node");
 	}
+	
+	return node->m_values[names.back()];
 }

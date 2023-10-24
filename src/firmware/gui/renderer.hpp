@@ -3,10 +3,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "../util/custom_array.hpp"
 #include "component.hpp"
 #include "shape2.hpp"
 #include "../math/matrix.hpp"
-#include "../util/custom_array.hpp"
 
 #include <map>
 

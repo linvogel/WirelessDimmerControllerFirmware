@@ -1,19 +1,13 @@
 #include "button.hpp"
 
-#ifdef MODULE_NAME
-#undef MODULE_NAME
-#endif
 #define MODULE_NAME "button"
 #include "../logging.hpp"
 
-#include "guibuilder.hpp"
-
 using namespace dim::gui;
 using namespace dim::math;
-using namespace dim::gui_builder;
 
-button::button(std::string text, std::function<void()> func, renderer &renderer, float x, float y, float w, float h)
-	: component(x, y, 1.0f, 1.0f, 0.0f, w, h), m_func(func), m_text(text), m_renderer(renderer)
+button::button(model::model_value *mval, std::function<void()> func, renderer &renderer, float x, float y, float w, float h)
+	: component(x, y, 1.0f, 1.0f, 0.0f, w, h), m_func(func), m_mval(mval), m_renderer(renderer)
 {
 	this->m_act_color = vector4f({0.0f, 0.218f, 0.411f, 1.0f});
 	this->m_shape = std::make_shared<quad2>(this->m_renderer, 0.0f, 0.0f, w, 0.0f, w, h, 0.0f, h);
@@ -26,12 +20,13 @@ button::button(std::string text, std::function<void()> func, renderer &renderer,
 void button::draw_component(renderer &renderer)
 {
 	this->component::draw_component(renderer);
+	std::string text = *this->m_mval;
 	
-	vector2f ts = renderer.get_text_size(this->m_text, 1.0f);
+	vector2f ts = renderer.get_text_size(text, 1.0f);
 	float ws = (this->m_size(0) * 0.8f) / ts(0);
 	float hs = (this->m_size(1) * 0.8f);
-	float size = std::min(ws, hs);
-	renderer.draw_text_centered(this->m_text, this->m_size(0) * 0.5f, this->m_size(1) * 0.5f, size);
+	float size = std::min(ws, hs * 0.75f);
+	renderer.draw_text_centered(text, this->m_size(0) * 0.5f, this->m_size(1) * 0.5f, size);
 }
 
 void button::onLeftMouseDown(float x, float y)
@@ -51,7 +46,7 @@ void button::set_callback(std::function<void()> func)
 	this->m_func = func;
 }
 
-component* button::from_yaml(renderer &renderer, YAML::Node root)
+component* button::from_yaml(renderer &renderer, YAML::Node root, model::model &model)
 {
 	debug("building button...");
 	// read position
@@ -60,9 +55,10 @@ component* button::from_yaml(renderer &renderer, YAML::Node root)
 	float w = root["bounds"]["w"].as<float>();
 	float h = root["bounds"]["h"].as<float>();
 	
-	std::string text = root["text"].as<std::string>();
+	std::string val_name = root["model_value"].as<std::string>();
+	model::model_value &mval = model[val_name];
 	
-	button* btn = new button(text, []() { info("Uninitialized button function!"); }, renderer, x, y, w, h);
-	btn->set_callback([btn]() { info("Button pressed: '%s'", btn->m_text.c_str()); });
+	button* btn = new button(&mval, []() { info("Uninitialized button function!"); }, renderer, x, y, w, h);
+	btn->set_callback([btn]() { info("Button pressed: '%s'", "TODO: find name"); });
 	return btn;
 }

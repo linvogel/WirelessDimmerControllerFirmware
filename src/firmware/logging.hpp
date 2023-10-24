@@ -21,16 +21,7 @@ static constexpr const char* _log_base_file_name(const char *full_name) {
 }
 
 #if !defined(MODULE_NAME)
-//#ifdef __BASE_FILE__
-//#define MODULE_NAME _log_base_file_name(__BASE_FILE__)
-//#else
-//#ifdef __FILE__
-//#define MODULE_NAME _log_base_file_name(__FILE__)
-//#else
-//#define MODULE_NAME "MeaningfulFilename"
-//#endif
-//#endif
-#define MODULE_NAME "MeaningfulFilename"
+#define MODULE_NAME "N/A"
 #endif
 
 #define fatal(...) dim::log::_fatal(__VA_ARGS__)

@@ -3,9 +3,6 @@
 #define STB_IMAGE_IMPLEMENTATION // This can be done here, since this is the only place where this library is used (for now at least)
 #include <stb_image.h>
 
-#ifdef MODULE_NAME
-#undef MODULE_NAME
-#endif
 #define MODULE_NAME "texture"
 #include "../logging.hpp"
 

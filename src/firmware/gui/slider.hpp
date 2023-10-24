@@ -32,8 +32,6 @@ namespace dim {
 			slider(renderer &renderer, float x, float y, float w, float h, float min_val, float max_val)
 				: slider(renderer, x, y, w, h, min_val, max_val, 10, w-10, 60) {}
 			
-			static component* from_yaml(renderer &renderer, YAML::Node root);
-			
 			virtual void draw_component(renderer &renderer) override;
 			virtual void onLeftMouseDown(float x, float y) override;
 			virtual void onLeftMouseUp(float x, float y) override;

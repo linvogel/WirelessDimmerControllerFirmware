@@ -1,9 +1,9 @@
 #include "configuration.hpp"
 
+#include <fstream>
+
 #define MODULE_NAME "config"
 #include "../logging.hpp"
-
-#include <fstream>
 
 using namespace dim;
 

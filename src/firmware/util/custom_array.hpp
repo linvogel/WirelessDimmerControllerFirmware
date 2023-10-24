@@ -1,16 +1,15 @@
 #pragma once
 
-#ifndef _CUSTOM_LOGGING_INCLUDED
-#ifndef MODULE_NAME
-#define MODULE_NAME "custom_array"
-#endif
-#include "../logging.hpp"
-#endif
-
 #include <cstddef>
 #include <cstdlib>
 #include <cassert>
 #include <exception>
+
+#ifdef MODULE_NAME
+#pragma message("MODULE_NAME defined as: " MODULE_NAME)
+#endif
+#define MODULE_NAME "custom_array"
+#include "../logging.hpp"
 
 namespace dim {
 	
@@ -151,3 +150,5 @@ namespace dim {
 	};
 	
 }
+
+#undef MODULE_NAME

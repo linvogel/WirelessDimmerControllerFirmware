@@ -1,8 +1,5 @@
 #include "knob.hpp"
 
-#ifdef MODULE_NAME
-#undef MODULE_NAME
-#endif
 #define MODULE_NAME "knob"
 #include "../logging.hpp"
 
@@ -81,17 +78,4 @@ void knob::onLeftMouseDown(float x, float y)
 void knob::onLeftMouseUp(float x, float y)
 {
 	this->m_grabbed = false;
-}
-
-component* knob::from_yaml(renderer &renderer, YAML::Node root)
-{
-	debug("building button...");
-	// read position
-	float x = root["bounds"]["x"].as<float>();
-	float y = root["bounds"]["y"].as<float>();
-	float size = root["bounds"]["size"].as<float>();
-	
-	knob* knb = new knob(renderer, x, y, size);
-	
-	return knb;
 }

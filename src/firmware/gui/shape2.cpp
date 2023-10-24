@@ -5,9 +5,6 @@
 #include <cstring>
 #include <cmath>
 
-#ifdef MODULE_NAME
-#undef MODULE_NAME
-#endif
 #define MODULE_NAME "shape2"
 #include "../logging.hpp"
 

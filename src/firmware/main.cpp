@@ -3,8 +3,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#define MODULE_NAME "main"
-#include "logging.hpp"
 #include "errors.hpp"
 
 #include "math/matrix.hpp"
@@ -16,11 +14,11 @@
 #include "gui/knob.hpp"
 #include "gui/label.hpp"
 
-#include "gui/guibuilder.hpp"
+#include "gui/onscreen_keyboard.hpp"
 
-#include "gui/keyboard_view.hpp"
+#define MODULE_NAME "main"
+#include "logging.hpp"
 
-#include "model/model.hpp"
 
 using namespace dim::gui;
 using namespace dim::in;
@@ -44,49 +42,29 @@ int main()
 	 */
 	
 	// create window object and prepare interfaces
-	window window("Dimmer Controller", 800, 480);
-	renderer &renderer = window.get_renderer();
-	input_controller &input_controller = window.get_input_ctrl();
+	debug("Creating main window...");
+	window win("Dimmer Controller", 800, 480);
+	renderer &renderer = win.get_renderer();
 	
-	vector4f cols[5] = {
-		{0.0f, 0.0f, 0.0f, 1.0f},
-		{1.0f, 0.0f, 0.0f, 1.0f},
-		{0.0f, 1.0f, 0.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f, 1.0f},
-		{1.0f, 1.0f, 1.0f, 1.0f}
-	};
-	int count = 0;
+	input_controller &input_controller = win.get_input_ctrl();
 	
-	//button btn1("Button", [&]() { renderer.text_color = cols[count++ % 5]; }, renderer, 10, 10, 150, 30);
-	//button btn2("Mute", []() { std::cout << "btn2 pressed" << std::endl; }, renderer, 10, 50, 150, 30);
-	//
-	//slider sld1(renderer, 300, 200, 60, 280, 0, 1);
-	//
-	//knob kn1(renderer, 500, 100, 100);
-	//
-	//label lbl1(renderer, 100, 400, 200, 30, "hello, world", 16);
-	//
-	//panel pnl1(renderer, 100, 100, 170, 90);
-	//
-	//window.add(&kn1);
-	//window.add(&pnl1);
-	//window.add(&sld1);
-	//window.add(&lbl1);
-	//pnl1.add(&btn1);
-	//pnl1.add(&btn2);
 	
-	keyboard_view kbd_view(&window);
+	debug("Setting up GUI...");
+
 	
+	debug("Setting up renderer...");
 	renderer.set_swap_interval(1);
 	
-	while (!window.shoud_close()) {
-		//trace("Render cycle...");
+	info("Setup complete, entering draw loop...");
+	
+	while (!win.shoud_close()) {
+		trace("Render cycle...");
 		renderer.wait(0.25);
 		//trace("Waited...");
 		renderer.clear();
 		//trace("Cleared...");
 		
-		window.draw(renderer);
+		win.draw(renderer);
 		//trace("Drawn...");
 		
 		renderer.swap();

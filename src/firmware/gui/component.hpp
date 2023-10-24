@@ -39,8 +39,6 @@ namespace dim {
 			component(float x, float y, float scalex, float scaley, float angle, float sizex, float sizey) : component({x, y}, {scalex, scaley}, angle, {sizex, sizey}) {}
 			~component() = default;
 			
-			static component* from_yaml(renderer &renderer, YAML::Node root);
-			
 			/**
 			 * @brief Get the parent component
 			 * 
@@ -99,8 +97,8 @@ namespace dim {
 			virtual component* hit_children(float local_x, float local_y); 
 			
 			
-			virtual void onMouseEnter() {};
-			virtual void onMouseExit() {};
+			virtual void onMouseEnter() {}
+			virtual void onMouseExit() {}
 			virtual void onMouseMove(float local_x, float local_y) {}
 			virtual void onLeftMouseDown(float local_x, float local_y) {}
 			virtual void onLeftMouseUp(float local_x, float local_y) {}

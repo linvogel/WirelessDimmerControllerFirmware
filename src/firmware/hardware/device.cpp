@@ -1,9 +1,9 @@
 #include "device.hpp"
 
+#include <memory>
+
 #define MODULE_NAME "device"
 #include "../logging.hpp"
-
-#include <memory>
 
 using namespace dim::hw;
 

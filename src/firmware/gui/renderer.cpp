@@ -1,14 +1,11 @@
 #include "renderer.hpp"
 #include "../errors.hpp"
 
-#ifdef MODULE_NAME
-#undef MODULE_NAME
-#endif
-#define MODULE_NAME "renderer"
-#include "../logging.hpp"
-
 #include <fstream>
 #include <cmath>
+
+#define MODULE_NAME "renderer"
+#include "../logging.hpp"
 
 using namespace dim::gui;
 
@@ -18,7 +15,7 @@ using namespace dim::gui;
 	x;\
 	unsigned int result = glGetError();\
 	if (result != GLEW_OK) {\
-		error("OpenGL ERROR: %s", glewGetErrorString(result));\
+		error("OpenGL ERROR: %s (0x%x)", glewGetErrorString(result), result);\
 	}\
 }
 #else
@@ -66,6 +63,7 @@ renderer::renderer(GLFWwindow *window)
 	GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 	
 	GL_CALL(glGenBuffers(1, &(this->m_text_vertex_buffer)));
+	debug("Renderer initialized successfully");
 }
 
 void renderer::init_text_rendering()
@@ -543,7 +541,7 @@ void renderer::draw_text_centered(std::string text, float x, float y, float size
 	vector2f rendered_size = this->get_text_size(text, size);
 	
 	float offset_x = x - rendered_size(0) * 0.5f;
-	float offset_y = y + rendered_size(1) * 0.5f;
+	float offset_y = y + size * 0.3f;
 	
 	for (char c : text) {
 		const glyph &g = this->m_font_map[c];
