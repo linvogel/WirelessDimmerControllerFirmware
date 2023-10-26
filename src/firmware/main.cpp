@@ -44,7 +44,10 @@ int main()
 	// create window object and prepare interfaces
 	debug("Creating main window...");
 	window win("Dimmer Controller", 800, 480);
+	model mod;
 	renderer &renderer = win.get_renderer();
+	onscreen_keyboard okbd(&win, &mod);
+	win.set_keyboard(&okbd);
 	
 	input_controller &input_controller = win.get_input_ctrl();
 	

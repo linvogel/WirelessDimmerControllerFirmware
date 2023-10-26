@@ -28,7 +28,7 @@ namespace dim {
 			button *m_clear;
 			std::vector<component*> m_components;
 			model::model_value *m_value;
-			model::model m_model; // dummy model for buttons
+			model::model *m_model; // dummy model for buttons
 			int m_key_counter;
 			uint32_t m_cursor;
 			
@@ -45,10 +45,10 @@ namespace dim {
 			void add_simple_key(uint32_t type, const char *text, float col, uint32_t row);
 			
 		public:
-			onscreen_keyboard(window *window);
+			onscreen_keyboard(window *window, model::model *model);
 			~onscreen_keyboard();
 			
-			void show(model::model_value *value);
+			void show(const std::string &value_name);
 		};
 	}
 }

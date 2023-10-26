@@ -60,7 +60,8 @@ namespace dim {
 			void push_scene(size_t scene);
 			void pop_scene();
 			
-			void show_keyboard(model::model_value *value);
+			void set_keyboard(onscreen_keyboard *okbd);
+			void show_keyboard(const std::string &value_name);
 		};
 		
 	}

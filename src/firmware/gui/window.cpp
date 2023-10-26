@@ -46,9 +46,6 @@ window::window(std::string name, int width, int height)
 	this->m_shape->set_background_color(this->m_bg_color);
 		
 	this->m_size = this->m_shape->get_size();
-	
-	// prepare onscreen keyboard
-	this->m_onscreen_kbd = new onscreen_keyboard(this);
 }
 
 window::~window()
@@ -111,7 +108,12 @@ void window::pop_scene()
 	this->set_scene(this->m_scene_stack.back());
 }
 
-void window::show_keyboard(model::model_value *value)
+void window::set_keyboard(onscreen_keyboard *okbd)
 {
-	this->m_onscreen_kbd->show(value);
+	this->m_onscreen_kbd = okbd;
+}
+
+void window::show_keyboard(const std::string &value_name)
+{
+	this->m_onscreen_kbd->show(value_name);
 }

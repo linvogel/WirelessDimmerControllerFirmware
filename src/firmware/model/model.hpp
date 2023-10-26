@@ -94,11 +94,12 @@ namespace dim {
 			
 			bool add(const std::string &name, std::string value);
 			model_value& operator[](const std::string &name);
+			
+			const bool contains_key(const std::string &name) const;
 		
 		private:
-			const bool is_valid_name(const std::string &name);
-			const std::vector<std::string> separate(const std::string &name);
-			const bool table_walk(std::vector<std::string> &names, model_node **retval);
+			const bool table_walk(std::vector<std::string> &names, model_node **retval) const;
+			const bool table_walk(std::vector<std::string> &names, model_value **retval) const;
 		};
 	}
 }
