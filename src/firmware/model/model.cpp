@@ -8,6 +8,7 @@ using namespace dim::model;
 
 model::model() : m_root("root", nullptr) {}
 
+model::~model() {}
 
 
 const bool model::is_valid_name(const std::string &name)
@@ -65,8 +66,16 @@ const bool model::table_walk(std::vector<std::string> &names, model_node **retva
 }
 
 
-template<typename T>
-bool model::add(const std::string name, T value)
+model_node::model_node(std::string name, model_node *parent)
+{
+	this->m_name = name;
+	this->m_parent = parent;
+	this->m_nodes.clear();
+	this->m_values.clear();
+}
+
+
+bool model::add(const std::string &name, std::string value)
 {
 	return true;
 }
@@ -76,7 +85,7 @@ bool model::add(const std::string name, T value)
 model_value& model::operator[](const std::string &name)
 {
 	model_node *node;
-	std::vector<std::string> names = this->separate(name);
+	std::vector<std::string> names = ::separate(name);
 	bool success = this->table_walk(names, &node);
 	
 	if (!success) {

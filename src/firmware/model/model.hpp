@@ -92,8 +92,7 @@ namespace dim {
 			model();
 			~model();
 			
-			template<typename T>
-			bool add(const std::string name, T value);
+			bool add(const std::string &name, std::string value);
 			model_value& operator[](const std::string &name);
 		
 		private:
