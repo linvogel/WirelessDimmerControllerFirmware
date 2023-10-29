@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component.hpp"
+#include "model/model.hpp"
 
 namespace dim {
 	namespace gui
@@ -20,17 +21,19 @@ namespace dim {
 			
 			bool m_grabbed;
 			float m_value;
-			float m_pos;
 			float m_start_pos;
 			float m_len;
 			float m_miny;
 			float m_maxy;
 			float m_mousey;
 			
+			model::model &m_model;
+			std::string m_value_name;
+			
 		public:
-			slider(renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height);
-			slider(renderer &renderer, float x, float y, float w, float h, float min_val, float max_val)
-				: slider(renderer, x, y, w, h, min_val, max_val, 10, w-10, 60) {}
+			slider(model::model &model, std::string value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height);
+			slider(model::model &model, std::string value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val)
+				: slider(model, value_name, renderer, x, y, w, h, min_val, max_val, 10, w-10, 60) {}
 			
 			virtual void draw_component(renderer &renderer) override;
 			virtual void onLeftMouseDown(float x, float y) override;

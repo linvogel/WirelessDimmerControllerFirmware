@@ -6,8 +6,8 @@
 using namespace dim::gui;
 using namespace dim::math;
 
-button::button(model::model_value *mval, std::function<void()> func, renderer &renderer, float x, float y, float w, float h)
-	: component(x, y, 1.0f, 1.0f, 0.0f, w, h), m_func(func), m_mval(mval), m_renderer(renderer)
+button::button(model::model &model, std::string value_name, std::function<void()> func, renderer &renderer, float x, float y, float w, float h)
+	: component(x, y, 1.0f, 1.0f, 0.0f, w, h), m_func(func), m_model(model), m_renderer(renderer), m_value_name(value_name)
 {
 	this->m_act_color = vector4f({0.0f, 0.218f, 0.411f, 1.0f});
 	this->m_shape = std::make_shared<quad2>(this->m_renderer, 0.0f, 0.0f, w, 0.0f, w, h, 0.0f, h);
@@ -20,7 +20,7 @@ button::button(model::model_value *mval, std::function<void()> func, renderer &r
 void button::draw_component(renderer &renderer)
 {
 	this->component::draw_component(renderer);
-	std::string text = *this->m_mval;
+	std::string text = static_cast<std::string>(this->m_model[this->m_value_name]);
 	
 	vector2f ts = renderer.get_text_size(text, 1.0f);
 	float ws = (this->m_size(0) * 0.8f) / ts(0);
@@ -44,21 +44,4 @@ void button::onLeftMouseUp(float x, float y)
 void button::set_callback(std::function<void()> func)
 {
 	this->m_func = func;
-}
-
-component* button::from_yaml(renderer &renderer, YAML::Node root, model::model &model)
-{
-	debug("building button...");
-	// read position
-	float x = root["bounds"]["x"].as<float>();
-	float y = root["bounds"]["y"].as<float>();
-	float w = root["bounds"]["w"].as<float>();
-	float h = root["bounds"]["h"].as<float>();
-	
-	std::string val_name = root["model_value"].as<std::string>();
-	model::model_value &mval = model[val_name];
-	
-	button* btn = new button(&mval, []() { info("Uninitialized button function!"); }, renderer, x, y, w, h);
-	btn->set_callback([btn]() { info("Button pressed: '%s'", "TODO: find name"); });
-	return btn;
 }

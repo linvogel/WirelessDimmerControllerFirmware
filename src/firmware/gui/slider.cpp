@@ -7,8 +7,10 @@ using namespace dim::gui;
 using namespace dim::math;
 
 
-slider::slider(renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height)
+slider::slider(model::model &model, std::string value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height)
 	: component(x, y, 1, 1, 0, w, h)
+	, m_model(model)
+	, m_value_name(value_name)
 	, m_min_value(min_val)
 	, m_max_value(max_val)
 	, m_knob_width(knob_width)
@@ -37,7 +39,6 @@ slider::slider(renderer &renderer, float x, float y, float w, float h, float min
 	this->m_len = h  - knob_height - 10;
 	this->m_miny = 0;
 	this->m_maxy = this->m_len;
-	this->m_pos = 0;
 	this->m_value = this->m_max_value;
 	this->m_grabbed = false;
 }
@@ -45,6 +46,7 @@ slider::slider(renderer &renderer, float x, float y, float w, float h, float min
 void slider::draw_component(renderer &renderer)
 {
 	renderer.draw_shape(this->m_shape.get());
+	float position = static_cast<float>(this->m_model[this->m_value_name]);
 	
 	float rail_x = (this->m_size(0) - this->m_rail_width) * 0.5f;
 	float rail_y = this->m_knob_height*0.5f;
@@ -59,7 +61,7 @@ void slider::draw_component(renderer &renderer)
 	renderer.draw_shape(&(this->m_rail));
 	renderer.pop_proj();
 	renderer.push_proj();
-	renderer.translate({knob_x, knob_y + this->m_pos}, true);
+	renderer.translate({knob_x, knob_y + position}, true);
 	renderer.draw_shape(&(this->m_knob));
 	renderer.pop_proj();
 }
@@ -67,15 +69,17 @@ void slider::draw_component(renderer &renderer)
 void slider::onMouseMove(float x, float y)
 {
 	if (this->m_grabbed) {
-		this->m_pos = std::min(std::max(this->m_start_pos + y - this->m_mousey, this->m_miny), this->m_maxy);
+		float position = std::min(std::max(this->m_start_pos + y - this->m_mousey, this->m_miny), this->m_maxy);
+		this->m_model[this->m_value_name] = position;
 	}
 }
 
 void slider::onLeftMouseDown(float x, float y)
 {
-	if (x >= 5 && this->m_size(0) - 5 >= x && y >= this->m_pos + 5 && y <= this->m_pos + this->m_knob_height + 5) {
+	float position = static_cast<float>(this->m_model[this->m_value_name]);
+	if (x >= 5 && this->m_size(0) - 5 >= x && y >= position + 5 && y <= position + this->m_knob_height + 5) {
 		this->m_mousey = y;
-		this->m_start_pos = this->m_pos;
+		this->m_start_pos = position;
 		this->m_grabbed = true;
 		this->m_knob.set_background_color(this->m_drag_col);
 	}
@@ -84,5 +88,5 @@ void slider::onLeftMouseDown(float x, float y)
 void slider::onLeftMouseUp(float x, float y)
 {
 	this->m_grabbed = false;
-		this->m_knob.set_background_color(this->m_bg_color);
+	this->m_knob.set_background_color(this->m_bg_color);
 }

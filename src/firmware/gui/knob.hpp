@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component.hpp"
-
+#include "model/model.hpp"
 
 
 namespace dim {
@@ -13,15 +13,17 @@ namespace dim {
 			float m_value;
 			float m_min_angle;
 			float m_max_angle;
-			float m_angle;
 			float m_start_angle;
 			float m_mousey;
 			float m_sensitivity;
 			bool m_grabbed;
 			
 			textured_quad2 m_knob;
+			
+			model::model &m_model;
+			std::string m_value_name;
 		public:
-			knob(renderer &renderer, float x, float y, float size);
+			knob(model::model &model, std::string value_name, renderer &renderer, float x, float y, float size);
 			
 			virtual void draw_component(renderer &renderer) override;
 			

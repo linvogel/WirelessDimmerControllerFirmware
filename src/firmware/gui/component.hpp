@@ -3,8 +3,6 @@
 #include <vector>
 #include <memory>
 
-#include <yaml-cpp/yaml.h>
-
 #include "../math/matrix.hpp"
 #include "renderer.hpp"
 

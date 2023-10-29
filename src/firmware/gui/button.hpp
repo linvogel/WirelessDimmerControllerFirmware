@@ -11,15 +11,14 @@ namespace dim {
 		
 		class button : public virtual component {
 			std::function<void()> m_func;
-			model::model_value *m_mval;
+			model::model &m_model;
+			std::string m_value_name;
 			
 			renderer &m_renderer;
 			
 			vector4f m_act_color;
 		public:
-			button(model::model_value *mval, std::function<void()> func, renderer &renderer, float x, float y, float w, float h);
-			
-			static component* from_yaml(renderer &renderer, YAML::Node root, model::model &model);
+			button(model::model &model, std::string value_name, std::function<void()> func, renderer &renderer, float x, float y, float w, float h);
 			
 			virtual void set_callback(std::function<void()> func);
 			

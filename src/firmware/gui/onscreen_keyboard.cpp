@@ -13,12 +13,12 @@ using namespace dim::gui;
 #define UPPER 1
 #define SYMBOL 2
 
-onscreen_keyboard::onscreen_keyboard(window *window, model::model *model)
+onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
+	: m_window(window), m_model(model)
 {
 	debug("Creating onscreen keyboard...");
-	this->m_window = window;
-	renderer &renderer = this->m_window->get_renderer();
-	this->m_scene = this->m_window->create_scene();
+	renderer &renderer = this->m_window.get_renderer();
+	this->m_scene = this->m_window.create_scene();
 	this->m_components = std::vector<component*>(128);
 	
 	// create the two content panes for letters and symbols
@@ -28,15 +28,10 @@ onscreen_keyboard::onscreen_keyboard(window *window, model::model *model)
 	this->m_keys[1][0] = new panel(renderer, 0, 80, 800, 400);
 	this->m_keys[1][1] = this->m_keys[1][0];
 	
-	// setup buffer
-	this->m_buffer = std::string();
-	this->m_buffer.reserve(256);
-	this->m_buffer.clear();
-	
 	// setup model information
 	this->m_key_counter = 0;
 	this->m_model = model;
-	if (!this->m_model->contains_key_partial("language")) {
+	if (!this->m_model.contains_key_partial("language")) {
 		fatal("Model does not contain language section!");
 		throw std::runtime_error("Model does not contain a language section!");
 	}
@@ -164,18 +159,20 @@ onscreen_keyboard::onscreen_keyboard(window *window, model::model *model)
 	
 	// build complete scene
 	trace("Completing onscreen keyboard...");
-	this->m_window->set_scene(this->m_scene);
+	this->m_window.set_scene(this->m_scene);
 	this->m_case = 0;
 	this->m_cat = 0;
 	this->m_cursor = 0;
-	this->m_text_field = new label(renderer, 5, 5, 720, 70, this->m_buffer, 32);
-	if (!this->m_model->contains_key("language.okbd.btn_clear")) {
-		this->m_model->add("language.okbd.btn_clear", "X");
+	// setup buffer
+	this->m_model.add("tmp.oskb.buffer_string", "");
+	this->m_text_field = new label(this->m_model, "tmp.oskb.buffer_string", renderer, 5, 5, 720, 70, 32);
+	if (!this->m_model.contains_key("language.okbd.btn_clear")) {
+		this->m_model.add("language.okbd.btn_clear", "X");
 	}
-	this->m_clear = new button(&((*this->m_model)["language.okbd.btn_clear"]), [this]() { this->clear(); }, this->m_window->get_renderer(), 730, 10, 60, 60);
-	this->m_window->add(this->m_text_field);
-	this->m_window->add(this->m_keys[this->m_cat][this->m_case]);
-	this->m_window->add(this->m_clear);
+	this->m_clear = new button(this->m_model, "language.okbd.btn_clear", [this]() { this->clear(); }, this->m_window.get_renderer(), 730, 10, 60, 60);
+	this->m_window.add(this->m_text_field);
+	this->m_window.add(this->m_keys[this->m_cat][this->m_case]);
+	this->m_window.add(this->m_clear);
 	
 	debug("Onscreen keyboard ready.");
 }
@@ -195,13 +192,12 @@ void onscreen_keyboard::add_key(uint32_t type, std::string text, std::function<v
 	snprintf(tmp, 64, "language.okbd.btn_%s", text.c_str());
 	std::string btn_name(tmp);
 	trace("debugging: checking for key in model...");
-	if (!this->m_model->contains_key(btn_name)) {
+	if (!this->m_model.contains_key(btn_name)) {
 	trace("debugging: key not found, adding it...");
-		this->m_model->add(btn_name, text);
+		this->m_model.add(btn_name, text);
 	}
 	trace("debugging: key available");
-	model::model_value &mval = (*this->m_model)[btn_name];
-	button *btn = new button(&mval, func, this->m_window->get_renderer(), 5 + ((row == 1) * 32) + 72 * col, (float)(5 + 80 * row), 67 * width, 67);
+	button *btn = new button(this->m_model, btn_name, func, this->m_window.get_renderer(), 5 + ((row == 1) * 32) + 72 * col, (float)(5 + 80 * row), 67 * width, 67);
 	this->m_components.push_back(btn);
 	this->m_keys[(type & 0x02) >> 1][type & 0x01]->add(btn);
 }
@@ -214,40 +210,40 @@ void onscreen_keyboard::add_simple_key(uint32_t type, const char *text, float co
 void onscreen_keyboard::shift()
 {
 	trace("Onscreen Keyboard: shift");
-	this->m_window->remove_child(this->m_keys[0][0]);
-	this->m_window->remove_child(this->m_keys[0][1]);
-	this->m_window->remove_child(this->m_keys[1][0]);
+	this->m_window.remove_child(this->m_keys[0][0]);
+	this->m_window.remove_child(this->m_keys[0][1]);
+	this->m_window.remove_child(this->m_keys[1][0]);
 	this->m_case = (1 - this->m_case) & 0x01;
-	this->m_window->add(this->m_keys[this->m_cat][this->m_case]);
-	this->m_window->draw(this->m_window->get_renderer());
+	this->m_window.add(this->m_keys[this->m_cat][this->m_case]);
+	this->m_window.draw(this->m_window.get_renderer());
 }
 
 void onscreen_keyboard::change()
 {
 	trace("Onscreen Keyboard: change");
-	this->m_window->remove_child(this->m_keys[0][0]);
-	this->m_window->remove_child(this->m_keys[0][1]);
-	this->m_window->remove_child(this->m_keys[1][0]);
+	this->m_window.remove_child(this->m_keys[0][0]);
+	this->m_window.remove_child(this->m_keys[0][1]);
+	this->m_window.remove_child(this->m_keys[1][0]);
 	this->m_cat = (1 - this->m_cat) & 0x01;
-	this->m_window->add(this->m_keys[this->m_cat][this->m_case]);
-	this->m_window->draw(this->m_window->get_renderer());
+	this->m_window.add(this->m_keys[this->m_cat][this->m_case]);
+	this->m_window.draw(this->m_window.get_renderer());
 }
 
 
 void onscreen_keyboard::backspace() {
 	trace("Onscreen Keyboard: backspace");
 	if (this->m_cursor == 0) return;
-	this->m_buffer.erase(--this->m_cursor);
-	this->m_text_field->set_text(this->m_buffer);
+	std::string buffer = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
+	buffer.erase(--this->m_cursor);
+	this->m_model["tmp.oskb.buffer_string"] = buffer;
 }
 
 void onscreen_keyboard::enter_char(const char* c)
 {
 	trace("Onscreen Keyboard: key (%c)", c[0]);
-	this->m_buffer.insert(this->m_cursor++, c);
-	trace("check 1");
-	this->m_text_field->set_text(this->m_buffer);
-	trace("check 2");
+	std::string buffer = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
+	buffer.insert(this->m_cursor++, c);
+	this->m_model["tmp.oskb.buffer_string"] = buffer;
 	
 	// if this was a capital char, release shift
 	if (this->m_case && !this->m_cat) this->shift();
@@ -256,10 +252,10 @@ void onscreen_keyboard::enter_char(const char* c)
 void onscreen_keyboard::enter()
 {
 	trace("Onscreen Keyboard: enter");
-	*this->m_value = this->m_buffer;
+	*this->m_value = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
 	this->clear();
 	this->m_value = nullptr;
-	this->m_window->pop_scene();
+	this->m_window.pop_scene();
 }
 
 void onscreen_keyboard::cancel()
@@ -267,26 +263,23 @@ void onscreen_keyboard::cancel()
 	trace("Onscreen Keyboard: cancel");
 	this->clear();
 	this->m_value = nullptr;
-	this->m_window->pop_scene();
+	this->m_window.pop_scene();
 }
 
 void onscreen_keyboard::clear()
 {
-	this->m_buffer.clear();
-	this->m_text_field->set_text(this->m_buffer);
+	this->m_model["tmp.oskb.buffer_string"] = std::string();
 	this->m_cursor = 0;
 }
 
 void onscreen_keyboard::show(const std::string &value_name)
 {
 	debug("Showing onscreen keyboard...");
-	this->m_value = &((*this->m_model)[value_name]);
-	this->m_buffer.clear();
+	this->m_value = &this->m_model[value_name];
 	std::string tmp = *this->m_value;
-	this->m_buffer.assign(tmp);
-	this->m_cursor = (uint32_t)this->m_buffer.size();
-	this->m_text_field->set_text(this->m_buffer);
+	this->m_model["tmp.oskb.buffer_string"] = tmp;
+	this->m_cursor = (uint32_t)tmp.size();
 	if (this->m_case) this->shift();
 	if (this->m_cat) this->change();
-	this->m_window->push_scene(this->m_scene);
+	this->m_window.push_scene(this->m_scene);
 }

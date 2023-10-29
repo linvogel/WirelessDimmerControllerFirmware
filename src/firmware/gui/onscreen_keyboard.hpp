@@ -18,7 +18,7 @@ namespace dim {
 		 * 
 		 */
 		class onscreen_keyboard {
-			window *m_window;
+			window &m_window;
 			size_t m_scene;
 			std::string m_buffer;
 			component *m_keys[2][2];
@@ -28,7 +28,7 @@ namespace dim {
 			button *m_clear;
 			std::vector<component*> m_components;
 			model::model_value *m_value;
-			model::model *m_model; // dummy model for buttons
+			model::model &m_model;
 			int m_key_counter;
 			uint32_t m_cursor;
 			
@@ -45,7 +45,7 @@ namespace dim {
 			void add_simple_key(uint32_t type, const char *text, float col, uint32_t row);
 			
 		public:
-			onscreen_keyboard(window *window, model::model *model);
+			onscreen_keyboard(window &window, model::model &model);
 			~onscreen_keyboard();
 			
 			void show(const std::string &value_name);
