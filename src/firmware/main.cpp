@@ -72,6 +72,7 @@ void save_config(model &mod)
 int main()
 {
 	dim::log::init();
+	dim::log::set_log_level(dim::log::VERBOSE);
 	info("Starting DimmerControllerFirmware...");
 	
 	/**

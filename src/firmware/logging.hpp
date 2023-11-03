@@ -25,7 +25,7 @@ static constexpr const char* _log_base_file_name(const char *full_name) {
 #endif
 
 #if defined(WIN32)
-#define __CUSTOM_FUNCTION_NAME__ __FUNCDNAME__
+#define __CUSTOM_FUNCTION_NAME__ __FUNCTION__
 #elif defined(__GNUG__)
 #define __CUSTOM_FUNCTION_NAME__ __func__
 #endif
