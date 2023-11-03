@@ -17,7 +17,6 @@ static dim::log::log_level current_level = dim::log::TRACE;
 
 void dim::log::init()
 {
-	ftrace();
 	out_streams.push_back(&std::cout);
 	err_streams.push_back(&std::cerr);
 	
@@ -32,25 +31,21 @@ void dim::log::init()
 
 void dim::log::set_log_level(dim::log::log_level level)
 {
-	ftrace();
 	current_level = level;
 }
 
 void dim::log::add_out_stream(std::ostream out)
 {
-	ftrace();
 	out_streams.push_back(&out);
 }
 
 void dim::log::add_err_stream(std::ostream out)
 {
-	ftrace();
 	err_streams.push_back(&out);
 }
 
 void dim::log::_log(std::string mod_name, dim::log::log_level level, std::string &fmt, va_list args)
 {
-	ftrace();
 	if (level > current_level) return;
 	char date_time[256];
 	std::chrono::time_point now = std::chrono::system_clock::now();
@@ -80,7 +75,6 @@ void dim::log::_log(std::string mod_name, dim::log::log_level level, std::string
 
 bool dim::log::register_log_level(int level, std::string name)
 {
-	ftrace();
 	if (level_names[level].length() > 0) return false;
 	level_names[level] = name;
 	return true;

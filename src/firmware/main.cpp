@@ -71,7 +71,6 @@ void save_config(model &mod)
 
 int main()
 {
-	ftrace();
 	dim::log::init();
 	info("Starting DimmerControllerFirmware...");
 	
