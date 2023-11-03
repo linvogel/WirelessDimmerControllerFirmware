@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <gui/onscreen_keyboard.hpp>
+#include <gui/channel_screen.hpp>
 
 namespace dim {
 	namespace model {
@@ -17,6 +18,7 @@ namespace dim {
 	};
 	namespace gui {
 		class onscreen_keyboard;
+		class channel_screen;
 		
 		/**
 		 * @brief Unique window class to be used in this firmware. Only a single instance of this window may be created.
@@ -30,7 +32,9 @@ namespace dim {
 			std::vector<std::vector<dim::gui::component*>> m_scenes;
 			size_t m_scene;
 			std::vector<size_t> m_scene_stack;
-			onscreen_keyboard* m_onscreen_kbd;
+			
+			onscreen_keyboard *m_onscreen_kbd;
+			channel_screen *m_channel_screen;
 			
 		public:
 			/**
@@ -62,6 +66,9 @@ namespace dim {
 			
 			void set_keyboard(onscreen_keyboard *okbd);
 			void show_keyboard(const std::string &value_name);
+			
+			void set_channel_screen(channel_screen *ch_screen);
+			void show_channel_screen(const std::string &channel_prefix);
 		};
 		
 	}

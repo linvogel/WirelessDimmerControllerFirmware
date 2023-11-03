@@ -16,6 +16,9 @@
 #include "gui/label.hpp"
 
 #include "gui/onscreen_keyboard.hpp"
+#include "gui/channel_screen.hpp"
+
+#include "shell/shell.hpp"
 
 #define MODULE_NAME "main"
 #include "logging.hpp"
@@ -24,9 +27,11 @@
 using namespace dim::gui;
 using namespace dim::in;
 using namespace dim::model;
+using namespace dim::sh;
 
 void load_config(model &mod)
 {
+	ftrace();
 	info("Loading configuration...");
 	// first load configuration file
 	mod.load_category("cfg", "config.cfg");
@@ -48,6 +53,7 @@ void load_config(model &mod)
 
 void save_config(model &mod)
 {
+	ftrace();
 	info("Saving configuration...");
 	
 	// TODO: device state file
@@ -65,6 +71,7 @@ void save_config(model &mod)
 
 int main()
 {
+	ftrace();
 	dim::log::init();
 	info("Starting DimmerControllerFirmware...");
 	
@@ -88,7 +95,10 @@ int main()
 	window win("Dimmer Controller", 800, 480);
 	renderer &renderer = win.get_renderer();
 	onscreen_keyboard okbd(win, mod);
+	channel_screen ch_screen(renderer, win, mod);
+	
 	win.set_keyboard(&okbd);
+	win.set_channel_screen(&ch_screen);
 	
 	input_controller &input_controller = win.get_input_ctrl();
 	
@@ -100,6 +110,10 @@ int main()
 	
 	// save the config again, to store any defaults that got inserted
 	save_config(mod);
+	
+	// setting up shell
+	debug("Setting up shell...");
+	shell shell(win);
 	
 	info("Setup complete, entering draw loop...");
 	

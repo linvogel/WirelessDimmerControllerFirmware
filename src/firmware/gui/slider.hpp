@@ -31,9 +31,11 @@ namespace dim {
 			std::string m_value_name;
 			
 		public:
-			slider(model::model &model, std::string value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height);
-			slider(model::model &model, std::string value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val)
+			slider(model::model &model, const std::string &value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height);
+			slider(model::model &model, const std::string &value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val)
 				: slider(model, value_name, renderer, x, y, w, h, min_val, max_val, 10, w-10, 60) {}
+			
+			void set_value_name(const std::string &value_name);
 			
 			virtual void draw_component(renderer &renderer) override;
 			virtual void onLeftMouseDown(float x, float y) override;

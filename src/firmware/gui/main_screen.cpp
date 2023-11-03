@@ -7,10 +7,15 @@
 
 
 using namespace dim::gui;
+using namespace dim::model;
 
 
-main_screen::main_screen(renderer &renderer)
-	: panel(renderer, 0, 0, 800, 480), component(0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 800.0f, 480.0f)
+main_screen::main_screen(window &window, renderer &renderer, dim::model::model &model)
+	: m_window(window)
+	, m_renderer(renderer)
+	, m_model(model)
 {
 	// add main screen components
+	this->m_scene = this->m_window.create_scene();
+	this->m_window.set_scene(this->m_scene);
 }

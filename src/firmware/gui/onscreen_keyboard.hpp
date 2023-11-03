@@ -41,7 +41,7 @@ namespace dim {
 			void clear();
 			
 			std::function<void()> simple_key_func(const char* c);
-			void add_key(uint32_t type, std::string text, std::function<void()>, float col, uint32_t row, float width = 1);
+			void add_key(uint32_t type, std::string text, std::function<void()> func, float col, uint32_t row, float width = 1);
 			void add_simple_key(uint32_t type, const char *text, float col, uint32_t row);
 			
 		public:

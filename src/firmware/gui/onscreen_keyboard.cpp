@@ -16,6 +16,7 @@ using namespace dim::gui;
 onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 	: m_window(window), m_model(model)
 {
+	ftrace();
 	debug("Creating onscreen keyboard...");
 	renderer &renderer = this->m_window.get_renderer();
 	this->m_scene = this->m_window.create_scene();
@@ -179,15 +180,18 @@ onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 
 onscreen_keyboard::~onscreen_keyboard()
 {
+	ftrace();
 }
 
 std::function<void()> onscreen_keyboard::simple_key_func(const char* c)
 {
+	ftrace();
 	return [this, c]() { this->enter_char(c); };
 }
 
 void onscreen_keyboard::add_key(uint32_t type, std::string text, std::function<void()> func, float col, uint32_t row, float width)
 {
+	ftrace();
 	char tmp[64];
 	snprintf(tmp, 64, "language.okbd.btn_%s", text.c_str());
 	std::string btn_name(tmp);
@@ -204,12 +208,13 @@ void onscreen_keyboard::add_key(uint32_t type, std::string text, std::function<v
 
 void onscreen_keyboard::add_simple_key(uint32_t type, const char *text, float col, uint32_t row)
 {
+	ftrace();
 	this->add_key(type, text, this->simple_key_func(text), col, row, 1);
 }
 
 void onscreen_keyboard::shift()
 {
-	trace("Onscreen Keyboard: shift");
+	ftrace();
 	this->m_window.remove_child(this->m_keys[0][0]);
 	this->m_window.remove_child(this->m_keys[0][1]);
 	this->m_window.remove_child(this->m_keys[1][0]);
@@ -220,7 +225,7 @@ void onscreen_keyboard::shift()
 
 void onscreen_keyboard::change()
 {
-	trace("Onscreen Keyboard: change");
+	ftrace();
 	this->m_window.remove_child(this->m_keys[0][0]);
 	this->m_window.remove_child(this->m_keys[0][1]);
 	this->m_window.remove_child(this->m_keys[1][0]);
@@ -230,8 +235,9 @@ void onscreen_keyboard::change()
 }
 
 
-void onscreen_keyboard::backspace() {
-	trace("Onscreen Keyboard: backspace");
+void onscreen_keyboard::backspace()
+{
+	ftrace();
 	if (this->m_cursor == 0) return;
 	std::string buffer = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
 	buffer.erase(--this->m_cursor);
@@ -240,7 +246,7 @@ void onscreen_keyboard::backspace() {
 
 void onscreen_keyboard::enter_char(const char* c)
 {
-	trace("Onscreen Keyboard: key (%c)", c[0]);
+	ftrace();
 	std::string buffer = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
 	buffer.insert(this->m_cursor++, c);
 	this->m_model["tmp.oskb.buffer_string"] = buffer;
@@ -251,7 +257,7 @@ void onscreen_keyboard::enter_char(const char* c)
 
 void onscreen_keyboard::enter()
 {
-	trace("Onscreen Keyboard: enter");
+	ftrace();
 	*this->m_value = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
 	this->clear();
 	this->m_value = nullptr;
@@ -260,7 +266,7 @@ void onscreen_keyboard::enter()
 
 void onscreen_keyboard::cancel()
 {
-	trace("Onscreen Keyboard: cancel");
+	ftrace();
 	this->clear();
 	this->m_value = nullptr;
 	this->m_window.pop_scene();
@@ -268,12 +274,14 @@ void onscreen_keyboard::cancel()
 
 void onscreen_keyboard::clear()
 {
+	ftrace();
 	this->m_model["tmp.oskb.buffer_string"] = std::string();
 	this->m_cursor = 0;
 }
 
 void onscreen_keyboard::show(const std::string &value_name)
 {
+	ftrace();
 	debug("Showing onscreen keyboard...");
 	this->m_value = &this->m_model[value_name];
 	std::string tmp = *this->m_value;

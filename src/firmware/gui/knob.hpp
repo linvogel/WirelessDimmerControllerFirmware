@@ -25,6 +25,8 @@ namespace dim {
 		public:
 			knob(model::model &model, std::string value_name, renderer &renderer, float x, float y, float size);
 			
+			void set_value_name(const std::string &value_name);
+			
 			virtual void draw_component(renderer &renderer) override;
 			
 			virtual void onLeftMouseDown(float x, float y) override;

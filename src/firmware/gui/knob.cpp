@@ -15,6 +15,7 @@ knob::knob(model::model &model, std::string value_name, renderer &renderer, floa
 	, m_model(model)
 	, m_value_name(value_name)
 {
+	ftrace();
 	// create base shape with outline and fully rounded corners
 	this->m_shape = std::make_shared<quad2>(renderer, 0.0f, 0.0f, size, 0.0f, size, size, 0.0f, size);
 	this->m_shape->set_corner_radius(size * 0.5f);
@@ -36,8 +37,15 @@ knob::knob(model::model &model, std::string value_name, renderer &renderer, floa
 	this->m_alpha_max = { std::sin(this->m_max_angle), std::cos(this->m_max_angle) };
 }
 
+void knob::set_value_name(const std::string &value_name)
+{
+	ftrace();
+	this->m_value_name = value_name;
+}
+
 void knob::draw_component(renderer &renderer)
 {
+	ftrace();
 	unsigned int program = this->m_shape->get_special_program();
 	renderer.set_program(program);
 	
@@ -66,6 +74,7 @@ void knob::draw_component(renderer &renderer)
 
 void knob::onMouseMove(float x, float y)
 {
+	ftrace();
 	if (this->m_grabbed) {
 		this->m_model[this->m_value_name] = std::min(std::max(this->m_start_angle + (y - this->m_mousey)*this->m_sensitivity, this->m_min_angle), this->m_max_angle);
 	}
@@ -73,6 +82,7 @@ void knob::onMouseMove(float x, float y)
 
 void knob::onLeftMouseDown(float x, float y)
 {
+	ftrace();
 	this->m_mousey = y;
 	this->m_start_angle = static_cast<float>(this->m_model[this->m_value_name]);
 	this->m_grabbed = true;
@@ -80,5 +90,6 @@ void knob::onLeftMouseDown(float x, float y)
 
 void knob::onLeftMouseUp(float x, float y)
 {
+	ftrace();
 	this->m_grabbed = false;
 }

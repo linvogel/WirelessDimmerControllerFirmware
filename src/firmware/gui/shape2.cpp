@@ -16,6 +16,7 @@ shape2::shape2(renderer &renderer, size_t size, float *data)
 	, m_special_program(renderer.get_base_program())
 	, m_stroke_weight(0)
 {
+	ftrace();
 	debug("creating shape2...");
 	this->m_buffer = 0;
 	this->m_nElements = size;
@@ -48,6 +49,7 @@ shape2::shape2(renderer &renderer, size_t size, float *data)
 
 shape2::shape2(renderer &renderer, size_t size, std::initializer_list<float> values) : shape2(renderer, size)
 {
+	ftrace();
 	if (size != values.size()) {
 		warn("shape2 init received initializer list that is not the same size as the declared buffer!");
 	}
@@ -64,11 +66,12 @@ shape2::shape2(renderer &renderer, size_t size, std::initializer_list<float> val
 
 shape2::~shape2()
 {
-	debug("destroying shape2");
+	ftrace();
 }
 
 void shape2::update_buffer(renderer &renderer, size_t size, custom_array<float> &data)
 {
+	ftrace();
 	this->m_data = data;
 	if (this->m_data.get() == nullptr) return;
 	
@@ -89,27 +92,32 @@ void shape2::update_buffer(renderer &renderer, size_t size, custom_array<float> 
 
 // line 2
 line2::line2(renderer &renderer, float x1, float y1, float x2, float y2)
-	: shape2(renderer, 4, {x1, y1, x2, y2}) {}
+	: shape2(renderer, 4, {x1, y1, x2, y2}) {ftrace();}
 line2::line2(renderer &renderer, vector2f a, vector2f b)
-	: shape2(renderer, 4, {a(0), a(1), b(0), b(1)}) {}
+	: shape2(renderer, 4, {a(0), a(1), b(0), b(1)}) {ftrace();}
 
 // triang 2
 triang2::triang2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3)
-	: shape2(renderer, 6, {x1, y1, x2, y2, x3, y3}) {}
+	: shape2(renderer, 6, {x1, y1, x2, y2, x3, y3}) {ftrace();}
 triang2::triang2(renderer &renderer, vector2f a, vector2f b, vector2f c)
-	: shape2(renderer, 6, { a(0), a(1), b(0), b(1), c(0), c(1) }) {}
+	: shape2(renderer, 6, { a(0), a(1), b(0), b(1), c(0), c(1) }) {ftrace();}
 
 // quad 2
 quad2::quad2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
-	: shape2(renderer, 12, {x1, y1, x2, y2, x3, y3, x1, y1, x3, y3, x4, y4}) {
+	: shape2(renderer, 12, {x1, y1, x2, y2, x3, y3, x1, y1, x3, y3, x4, y4})
+{
+	ftrace();
 }
 quad2::quad2(renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d)
-	: shape2(renderer, 12, { a(0), a(1), b(0), b(1), c(0), c(1), a(0), a(1), c(0), c(1), d(0), d(1) }) {
+	: shape2(renderer, 12, { a(0), a(1), b(0), b(1), c(0), c(1), a(0), a(1), c(0), c(1), d(0), d(1) })
+{
+	ftrace();
 }
 
 // circle 2
 circle2::circle2(renderer &renderer, float x, float y, float r) : shape2(renderer, 2*N_VERT_CIRCLE + 4)
 {
+	ftrace();
 	// prepare some space for the values
 	vector2f current({1, 0});
 	vector2f tmp;
@@ -141,6 +149,7 @@ circle2::circle2(renderer &renderer, float x, float y, float r) : shape2(rendere
 textured_quad2::textured_quad2(renderer &renderer, std::initializer_list<float> values)
 	: shape2(renderer, 6 * 4)
 {
+	ftrace();
 	this->m_texture =  nullptr;
 	// order compatible with the generic quad2 implementation: 1 2 3 1 3 4
 	this->m_data[0] = *(values.begin()+0);
@@ -170,22 +179,25 @@ textured_quad2::textured_quad2(renderer &renderer, std::initializer_list<float> 
 }
 
 textured_quad2::textured_quad2(renderer &renderer, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
-	: textured_quad2(renderer, {x1, y1, x2, y2, x3, y3, x4, y4}) {}
+	: textured_quad2(renderer, {x1, y1, x2, y2, x3, y3, x4, y4}) {ftrace();}
 textured_quad2::textured_quad2(renderer &renderer, vector2f a, vector2f b, vector2f c, vector2f d)
-	: textured_quad2(renderer, { a(0), a(1), b(0), b(1), c(0), c(1), d(0), d(1) }) {}
+	: textured_quad2(renderer, { a(0), a(1), b(0), b(1), c(0), c(1), d(0), d(1) }) {ftrace();}
 
 textured_quad2::~textured_quad2()
 {
+	ftrace();
 	if (this->m_texture) delete this->m_texture;
 }
 
 void textured_quad2::set_texture(texture *texture)
 {
+	ftrace();
 	this->m_texture = texture;
 }
 
 void textured_quad2::update_uv()
 {
+	ftrace();
 	// order compatible with the generic quad2 implementation: 1 2 3 1 3 4
 	this->m_data[2]  = this->m_texture->m_uv[0](0); // 1
 	this->m_data[3]  = this->m_texture->m_uv[0](1); // 1

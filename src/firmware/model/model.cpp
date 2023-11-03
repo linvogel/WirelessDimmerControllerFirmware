@@ -12,6 +12,7 @@ using namespace dim::model;
 
 const bool is_valid_name(const std::string &name)
 {
+	ftrace();
 	auto is_ascii_lower = [](char c) { return c >= 'a' && c <= 'z'; };
 	auto is_ascii_upper = [](char c) { return c >= 'A' && c <= 'Z'; };
 	auto is_ascii_digit = [](char c) { return c >= '0' && c <= '9'; };
@@ -29,6 +30,7 @@ const bool is_valid_name(const std::string &name)
 
 const std::vector<std::string> separate(const std::string &name)
 {
+	ftrace();
 	std::vector<std::string> names;
 	
 	size_t off = 0;
@@ -46,23 +48,34 @@ const std::vector<std::string> separate(const std::string &name)
 	return names;
 }
 
-model::model() : m_root("root", nullptr) {}
+model::model() : m_root("root", nullptr)
+{
+	ftrace();
+	this->add("tmp.dummy_string", "dummy_string");
+	this->add("tmp.dummy_double", 0.0);
+	this->add("tmp.dummy_signed", static_cast<int64_t>(0));
+	this->add("tmp.dummy_unsigned", static_cast<uint64_t>(0));
+}
 
-model::~model() {}
+model::~model() {ftrace();}
 
 const bool model::table_walk(std::vector<std::string> &names, model_node **retval) const
 {
+	ftrace();
 	// Note the const_cast here, since nothing is actually changes here
 	model_node *current = const_cast<model_node*>(&(this->m_root));
 	
-	for (size_t i = 0; i < names.size()-1; i++) {
-		if (current->m_nodes.find(names[i]) != current->m_nodes.end()) {
-			// this node exists as a child of current
-			current = &(current->m_nodes.at(names[i]));
-		} else {
-			// this node does not exist as a child of current
-			*retval = nullptr;
-			return false;
+	if (names.size() != 0) {
+		for (size_t i = 0; i < names.size() - 1; i++) {
+			if (current->m_nodes.find(names[i]) != current->m_nodes.end()) {
+				// this node exists as a child of current
+				current = &(current->m_nodes.at(names[i]));
+			}
+			else {
+				// this node does not exist as a child of current
+				*retval = nullptr;
+				return false;
+			}
 		}
 	}
 	
@@ -72,6 +85,7 @@ const bool model::table_walk(std::vector<std::string> &names, model_node **retva
 
 const bool model::table_walk(std::vector<std::string> &names, model_value **retval) const
 {
+	ftrace();
 	// Note the const_cast here, since nothing is actually changes here
 	model_node *current = const_cast<model_node*>(&(this->m_root));
 	
@@ -98,6 +112,7 @@ const bool model::table_walk(std::vector<std::string> &names, model_value **retv
 
 const bool model::contains_key(const std::string &name) const
 {
+	ftrace();
 	model_value *rptr;
 	std::vector<std::string> names = ::separate(name);
 	return this->table_walk(names, &rptr);
@@ -105,6 +120,7 @@ const bool model::contains_key(const std::string &name) const
 
 const bool model::contains_key_partial(const std::string &name) const
 {
+	ftrace();
 	model_node *rptr;
 	std::vector<std::string> names = ::separate(name);
 	return this->table_walk(names, &rptr);
@@ -113,6 +129,7 @@ const bool model::contains_key_partial(const std::string &name) const
 
 model_node::model_node(std::string name, model_node *parent)
 {
+	ftrace();
 	this->m_name = name;
 	this->m_parent = parent;
 	this->m_nodes.clear();
@@ -122,7 +139,7 @@ model_node::model_node(std::string name, model_node *parent)
 template<typename T>
 bool model::add_generic(const std::string &name, T value)
 {
-	trace("model::add_generic");
+	ftrace();
 	if (this->contains_key(name)) {
 		(*this)[name] = value;
 		return true;
@@ -143,21 +160,22 @@ bool model::add_generic(const std::string &name, T value)
 }
 
 
-bool model::add(const std::string &name, std::string value)	{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, uint8_t value)		{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, uint16_t value)	{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, uint32_t value)	{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, uint64_t value)	{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, int8_t value)		{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, int16_t value)		{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, int32_t value)		{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, int64_t value)		{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, float value)		{ return this->add_generic(name, value); }
-bool model::add(const std::string &name, double value)		{ return this->add_generic(name, value); }
+bool model::add(const std::string &name, std::string value)	{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, uint8_t value)		{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, uint16_t value)	{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, uint32_t value)	{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, uint64_t value)	{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, int8_t value)		{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, int16_t value)		{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, int32_t value)		{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, int64_t value)		{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, float value)		{ ftrace(); return this->add_generic(name, value); }
+bool model::add(const std::string &name, double value)		{ ftrace(); return this->add_generic(name, value); }
 
 
 model_value::model_value(const model_value &other)
 {
+	ftrace();
 	this->m_double_val = other.m_double_val;
 	this->m_sign_val = other.m_sign_val;
 	this->m_unsign_val = other.m_unsign_val;
@@ -169,6 +187,7 @@ model_value::model_value(const model_value &other)
 
 model_value::model_value(model_value &&other)
 {
+	ftrace();
 	this->m_double_val = other.m_double_val;
 	this->m_sign_val = other.m_sign_val;
 	this->m_unsign_val = other.m_unsign_val;
@@ -180,6 +199,7 @@ model_value::model_value(model_value &&other)
 
 model_value& model_value::operator=(const model_value &other)
 {
+	ftrace();
 	this->m_double_val = other.m_double_val;
 	this->m_sign_val = other.m_sign_val;
 	this->m_unsign_val = other.m_unsign_val;
@@ -192,6 +212,7 @@ model_value& model_value::operator=(const model_value &other)
 
 model_value& model_value::operator=(model_value &&other)
 {
+	ftrace();
 	this->m_double_val = other.m_double_val;
 	this->m_sign_val = other.m_sign_val;
 	this->m_unsign_val = other.m_unsign_val;
@@ -205,6 +226,7 @@ model_value& model_value::operator=(model_value &&other)
 
 model_value& model::operator[](const std::string &name)
 {
+	ftrace();
 	model_node *node;
 	std::vector<std::string> names = ::separate(name);
 	bool success = this->table_walk(names, &node);
@@ -225,6 +247,7 @@ model_value& model::operator[](const std::string &name)
 
 void model::load_category(const std::string &name, const std::string &filename)
 {
+	ftrace();
 	trace("Loading model category: '%s'", name.c_str());
 	std::ifstream input_stream(filename);
 	std::string line;
@@ -305,6 +328,7 @@ void model::load_category(const std::string &name, const std::string &filename)
 
 void model_node::print_model_node(std::ostream &ostr, const std::string &prefix)
 {
+	ftrace();
 	// first print all the values
 	for (std::pair<const std::string, model_value> kv : this->m_values) {
 		if (prefix.size() != 0) ostr << prefix << ".";
@@ -335,6 +359,7 @@ void model_node::print_model_node(std::ostream &ostr, const std::string &prefix)
 
 bool model::save_category(const std::string &name, const std::string &filename)
 {
+	ftrace();
 	std::ofstream output_stream(filename);
 	
 	const std::map<std::string, model_node> &categories = this->m_root.m_nodes;

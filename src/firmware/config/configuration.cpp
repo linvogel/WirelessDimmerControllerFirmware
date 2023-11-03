@@ -10,6 +10,7 @@ using namespace dim;
 
 configuration::configuration(std::string filename)
 {
+	ftrace();
 	this->m_filename = filename;
 	try {
 		this->m_values = YAML::LoadFile(filename);
@@ -21,6 +22,7 @@ configuration::configuration(std::string filename)
 
 configuration::~configuration()
 {
+	ftrace();
 	std::ofstream out(this->m_filename);
 	out << this->m_values;
 	out.flush();
@@ -30,6 +32,7 @@ configuration::~configuration()
 template<typename T>
 T configuration::operator()(std::string name, T value)
 {
+	ftrace();
 	trace("CONFIG LOOKUP: %s", name.c_str());
 	// walk through the path
 	YAML::Node current = this->m_values;

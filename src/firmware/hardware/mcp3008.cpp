@@ -6,6 +6,7 @@ mcp3008::mcp3008() : device(16ULL) {}
 
 void mcp3008::sync()
 {
+	ftrace();
 	// this device is read only
 	// TODO: implement sync over SPI
 	

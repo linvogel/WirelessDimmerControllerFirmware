@@ -7,7 +7,7 @@ using namespace dim::gui;
 using namespace dim::math;
 
 
-slider::slider(model::model &model, std::string value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height)
+slider::slider(model::model &model, const std::string &value_name, renderer &renderer, float x, float y, float w, float h, float min_val, float max_val, float rail_width, float knob_width, float knob_height)
 	: component(x, y, 1, 1, 0, w, h)
 	, m_model(model)
 	, m_value_name(value_name)
@@ -20,6 +20,7 @@ slider::slider(model::model &model, std::string value_name, renderer &renderer, 
 	, m_knob(renderer, 0, 0, knob_width, 0, knob_width, knob_height, 0, knob_height)
 	, m_drag_col({0.8f, 0.8f, 0.8f, 1.0f})
 {
+	ftrace();
 	this->m_shape = std::make_shared<quad2>(renderer, 0.0f, 0.0f, w, 0.0f, w, h, 0.0f, h);
 	this->m_shape->set_background_color(this->m_bg_color);
 	this->m_shape->set_stroke_color(this->m_fg_color);
@@ -43,8 +44,15 @@ slider::slider(model::model &model, std::string value_name, renderer &renderer, 
 	this->m_grabbed = false;
 }
 
+void slider::set_value_name(const std::string &value_name)
+{
+	ftrace();
+	this->m_value_name = value_name;
+}
+
 void slider::draw_component(renderer &renderer)
 {
+	ftrace();
 	renderer.draw_shape(this->m_shape.get());
 	float position = static_cast<float>(this->m_model[this->m_value_name]);
 	
@@ -68,6 +76,7 @@ void slider::draw_component(renderer &renderer)
 
 void slider::onMouseMove(float x, float y)
 {
+	ftrace();
 	if (this->m_grabbed) {
 		float position = std::min(std::max(this->m_start_pos + y - this->m_mousey, this->m_miny), this->m_maxy);
 		this->m_model[this->m_value_name] = position;
@@ -76,6 +85,7 @@ void slider::onMouseMove(float x, float y)
 
 void slider::onLeftMouseDown(float x, float y)
 {
+	ftrace();
 	float position = static_cast<float>(this->m_model[this->m_value_name]);
 	if (x >= 5 && this->m_size(0) - 5 >= x && y >= position + 5 && y <= position + this->m_knob_height + 5) {
 		this->m_mousey = y;
@@ -87,6 +97,7 @@ void slider::onLeftMouseDown(float x, float y)
 
 void slider::onLeftMouseUp(float x, float y)
 {
+	ftrace();
 	this->m_grabbed = false;
 	this->m_knob.set_background_color(this->m_bg_color);
 }

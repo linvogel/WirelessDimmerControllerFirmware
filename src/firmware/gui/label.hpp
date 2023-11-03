@@ -14,6 +14,8 @@ namespace dim {
 		public:
 			label(model::model &model, std::string m_value_name, renderer &renderer, float x, float y, float w, float h, float font_size);
 			
+			void set_value_name(const std::string &value_name);
+			
 			virtual void draw_component(renderer &renderer) override;
 		};
 		

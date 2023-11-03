@@ -24,6 +24,12 @@ static constexpr const char* _log_base_file_name(const char *full_name) {
 #define MODULE_NAME "N/A"
 #endif
 
+#if defined(WIN32)
+#define __CUSTOM_FUNCTION_NAME__ __FUNCDNAME__
+#elif defined(__GNUG__)
+#define __CUSTOM_FUNCTION_NAME__ __func__
+#endif
+
 #define fatal(...) dim::log::_fatal(__VA_ARGS__)
 #define error(...) dim::log::_error(__VA_ARGS__)
 #define warn(...) dim::log::_warn(__VA_ARGS__)
@@ -31,6 +37,8 @@ static constexpr const char* _log_base_file_name(const char *full_name) {
 #define debug(...) dim::log::_debug(__VA_ARGS__)
 #define verbose(...) dim::log::_verbose(__VA_ARGS__)
 #define trace(...) dim::log::_trace(__VA_ARGS__)
+
+#define ftrace() dim::log::_trace("Function Trace: %s", __CUSTOM_FUNCTION_NAME__)
 
 
 namespace dim{
