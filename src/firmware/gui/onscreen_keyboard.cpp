@@ -23,7 +23,7 @@ onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 	this->m_components = std::vector<component*>(128);
 	
 	// create the two content panes for letters and symbols
-	trace("Creating keyboard panels...");
+	verbose("Creating keyboard panels...");
 	this->m_keys[0][0] = new panel(renderer, 0, 80, 800, 400);
 	this->m_keys[0][1] = new panel(renderer, 0, 80, 800, 400);
 	this->m_keys[1][0] = new panel(renderer, 0, 80, 800, 400);
@@ -37,7 +37,7 @@ onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 		throw std::runtime_error("Model does not contain a language section!");
 	}
 	
-	trace("Creating keys...");
+	verbose("Creating keys...");
 	// buttons for lower letters
 	this->add_simple_key(LOWER, "q", 0.0f, 0);
 	this->add_simple_key(LOWER, "w", 1.0f, 0);
@@ -75,7 +75,7 @@ onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 	this->add_key(LOWER, "shift", [this]() { this->shift(); }, 10.0f, 2, 1.0f);
 	
 	this->add_key(LOWER, "syms", [this]() { this->change(); }, 0.0f, 3, 1.5f);
-	this->add_key(LOWER, "space", [this]() { this->enter_char(" "); }, 1.5f, 3, 6.9f);
+	this->add_key(LOWER, "space", [this]() { this->enter_char("language.okbd.btn_space"); }, 1.5f, 3, 6.9f);
 	this->add_key(LOWER, "syms", [this]() { this->change(); }, 8.0f, 3, 1.5f);
 	this->add_key(LOWER, "cancel", [this]() { this->cancel(); }, 9.5f, 3, 1.5f);
 	
@@ -116,7 +116,7 @@ onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 	this->add_key(UPPER, "shift", [this]() { this->shift(); }, 10.0f, 2, 1.0f);
 	
 	this->add_key(UPPER, "syms", [this]() { this->change(); }, 0.0f, 3, 1.5f);
-	this->add_key(UPPER, "space", [this]() { this->enter_char(" "); }, 1.5f, 3, 6.9f);
+	this->add_key(UPPER, "space", [this]() { this->enter_char("language.okbd.btn_space"); }, 1.5f, 3, 6.9f);
 	this->add_key(UPPER, "syms", [this]() { this->change(); }, 8.0f, 3, 1.5f);
 	this->add_key(UPPER, "cancel", [this]() { this->cancel(); }, 9.5f, 3, 1.5f);
 	
@@ -154,12 +154,12 @@ onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 	this->add_key(SYMBOL, "shift", [this]() { this->shift(); }, 10.0f, 2, 1.0f);
 	
 	this->add_key(SYMBOL, "syms", [this]() { this->change(); }, 0.0f, 3, 1.5f);
-	this->add_key(SYMBOL, "space", [this]() { this->enter_char(" "); }, 1.5f, 3, 6.9f);
+	this->add_key(SYMBOL, "space", [this]() { this->enter_char("language.okbd.btn_space"); }, 1.5f, 3, 6.9f);
 	this->add_key(SYMBOL, "syms", [this]() { this->change(); }, 8.0f, 3, 1.5f);
 	this->add_key(SYMBOL, "cancel", [this]() { this->cancel(); }, 9.5f, 3, 1.5f);
 	
 	// build complete scene
-	trace("Completing onscreen keyboard...");
+	verbose("Completing onscreen keyboard...");
 	this->m_window.set_scene(this->m_scene);
 	this->m_case = 0;
 	this->m_cat = 0;
@@ -172,7 +172,6 @@ onscreen_keyboard::onscreen_keyboard(window &window, model::model &model)
 	}
 	this->m_clear = new button(this->m_model, "language.okbd.btn_clear", [this]() { this->clear(); }, this->m_window.get_renderer(), 730, 10, 60, 60);
 	this->m_window.add(this->m_text_field);
-	this->m_window.add(this->m_keys[this->m_cat][this->m_case]);
 	this->m_window.add(this->m_clear);
 	
 	debug("Onscreen keyboard ready.");
@@ -183,33 +182,36 @@ onscreen_keyboard::~onscreen_keyboard()
 	ftrace();
 }
 
-std::function<void()> onscreen_keyboard::simple_key_func(const char* c)
-{
-	ftrace();
-	return [this, c]() { this->enter_char(c); };
-}
-
-void onscreen_keyboard::add_key(uint32_t type, std::string text, std::function<void()> func, float col, uint32_t row, float width)
+std::function<void()> onscreen_keyboard::simple_key_func(const std::string &value_name)
 {
 	ftrace();
 	char tmp[64];
-	snprintf(tmp, 64, "language.okbd.btn_%s", text.c_str());
+	snprintf(tmp, 64, "language.okbd.btn_%s", value_name.c_str());
 	std::string btn_name(tmp);
-	trace("debugging: checking for key in model...");
+	return [this, btn_name]() { this->enter_char(btn_name); };
+}
+
+void onscreen_keyboard::add_key(uint32_t type, const std::string &value_name, std::function<void()> func, float col, uint32_t row, float width)
+{
+	ftrace();
+	char tmp[64];
+	snprintf(tmp, 64, "language.okbd.btn_%s", value_name.c_str());
+	std::string btn_name(tmp);
+	verbose("debugging: checking for key in model...");
 	if (!this->m_model.contains_key(btn_name)) {
-	trace("debugging: key not found, adding it...");
-		this->m_model.add(btn_name, text);
+	verbose("debugging: key not found, adding it...");
+		this->m_model.add(btn_name, value_name);
 	}
-	trace("debugging: key available");
+	verbose("debugging: key available");
 	button *btn = new button(this->m_model, btn_name, func, this->m_window.get_renderer(), 5 + ((row == 1) * 32) + 72 * col, (float)(5 + 80 * row), 67 * width, 67);
 	this->m_components.push_back(btn);
 	this->m_keys[(type & 0x02) >> 1][type & 0x01]->add(btn);
 }
 
-void onscreen_keyboard::add_simple_key(uint32_t type, const char *text, float col, uint32_t row)
+void onscreen_keyboard::add_simple_key(uint32_t type, const std::string &value_name, float col, uint32_t row)
 {
 	ftrace();
-	this->add_key(type, text, this->simple_key_func(text), col, row, 1);
+	this->add_key(type, value_name, this->simple_key_func(value_name), col, row, 1);
 }
 
 void onscreen_keyboard::shift()
@@ -220,7 +222,7 @@ void onscreen_keyboard::shift()
 	this->m_window.remove_child(this->m_keys[1][0]);
 	this->m_case = (1 - this->m_case) & 0x01;
 	this->m_window.add(this->m_keys[this->m_cat][this->m_case]);
-	this->m_window.draw(this->m_window.get_renderer());
+
 }
 
 void onscreen_keyboard::change()
@@ -231,7 +233,7 @@ void onscreen_keyboard::change()
 	this->m_window.remove_child(this->m_keys[1][0]);
 	this->m_cat = (1 - this->m_cat) & 0x01;
 	this->m_window.add(this->m_keys[this->m_cat][this->m_case]);
-	this->m_window.draw(this->m_window.get_renderer());
+
 }
 
 
@@ -244,11 +246,12 @@ void onscreen_keyboard::backspace()
 	this->m_model["tmp.oskb.buffer_string"] = buffer;
 }
 
-void onscreen_keyboard::enter_char(const char* c)
+void onscreen_keyboard::enter_char(const std::string &value_name)
 {
 	ftrace();
 	std::string buffer = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
-	buffer.insert(this->m_cursor++, c);
+	buffer.insert(this->m_cursor, static_cast<std::string>(this->m_model[value_name]));
+	this->m_cursor += static_cast<uint32_t>(static_cast<std::string>(this->m_model[value_name]).size() & 0xffffffff);
 	this->m_model["tmp.oskb.buffer_string"] = buffer;
 	
 	// if this was a capital char, release shift
@@ -261,6 +264,9 @@ void onscreen_keyboard::enter()
 	*this->m_value = static_cast<std::string>(this->m_model["tmp.oskb.buffer_string"]);
 	this->clear();
 	this->m_value = nullptr;
+	this->m_window.remove_child(this->m_keys[0][0]);
+	this->m_window.remove_child(this->m_keys[0][1]);
+	this->m_window.remove_child(this->m_keys[1][0]);
 	this->m_window.pop_scene();
 }
 
@@ -269,6 +275,9 @@ void onscreen_keyboard::cancel()
 	ftrace();
 	this->clear();
 	this->m_value = nullptr;
+	this->m_window.remove_child(this->m_keys[0][0]);
+	this->m_window.remove_child(this->m_keys[0][1]);
+	this->m_window.remove_child(this->m_keys[1][0]);
 	this->m_window.pop_scene();
 }
 
@@ -287,7 +296,8 @@ void onscreen_keyboard::show(const std::string &value_name)
 	std::string tmp = *this->m_value;
 	this->m_model["tmp.oskb.buffer_string"] = tmp;
 	this->m_cursor = (uint32_t)tmp.size();
+	this->m_window.push_scene(this->m_scene);
+	this->m_window.add(this->m_keys[this->m_cat][this->m_case]);
 	if (this->m_case) this->shift();
 	if (this->m_cat) this->change();
-	this->m_window.push_scene(this->m_scene);
 }

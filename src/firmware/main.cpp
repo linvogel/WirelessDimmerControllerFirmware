@@ -37,16 +37,24 @@ void load_config(model &mod)
 	mod.load_category("cfg", "config.cfg");
 	
 	// determine language selected by the configuration
-	verbose("Detecting language selection...");
+	debug("Detecting language selection...");
 	if (!mod.contains_key("lang")) {
 		warn("Configuration does not contain language selection. Defaulting to english...");
 		mod.add("lang", "english");
 	}
-	trace("Loading language file...");
+	debug("Loading language file...");
 	std::string lang_filename = std::string("lang/") + static_cast<std::string>(mod["lang"]) + std::string(".cfg");
 	mod.load_category("language", lang_filename);
 	
-	// TODO: load device state file
+	// load scene file
+	debug("Detecting scene selection...");
+	if (!mod.contains_key("scene")) {
+		warn("Configuration does not contain scene selection. Defaulting to scene0...");
+		mod.add("scene", "scene0");
+	}
+	debug("Loading scene file...");
+	std::string scene_filename = std::string("scene/") + static_cast<std::string>(mod["scene"]) + std::string(".cfg");
+	mod.load_category("scene", scene_filename);
 	
 	info("Config ready!");
 }
@@ -59,7 +67,7 @@ void save_config(model &mod)
 	// TODO: device state file
 	
 	// determine language and save language file
-	verbose("Saving language...");
+	debug("Saving language...");
 	std::string lang_filename = std::string("lang/") + static_cast<std::string>(mod["lang"]) + std::string(".cfg");
 	mod.save_category("language", lang_filename);
 	
@@ -91,19 +99,24 @@ int main()
 	load_config(mod);
 	
 	// create window object and prepare interfaces
+	debug("Setting up GUI...");
 	debug("Creating main window...");
 	window win("Dimmer Controller", 800, 480);
 	renderer &renderer = win.get_renderer();
+	
+	debug("Creating screens...");
 	onscreen_keyboard okbd(win, mod);
 	channel_screen ch_screen(renderer, win, mod);
 	
+	debug("Attaching screens to window");
 	win.set_keyboard(&okbd);
 	win.set_channel_screen(&ch_screen);
+	
+	win.show_channel_screen("scene.channel_0");
 	
 	input_controller &input_controller = win.get_input_ctrl();
 	
 	
-	debug("Setting up GUI...");
 	
 	debug("Setting up renderer...");
 	renderer.set_swap_interval(1);
@@ -118,17 +131,17 @@ int main()
 	info("Setup complete, entering draw loop...");
 	
 	while (!win.shoud_close()) {
-		trace("Render cycle...");
+		verbose("Render cycle...");
 		renderer.wait(0.25);
-		//trace("Waited...");
+		//verbose("Waited...");
 		renderer.clear();
-		//trace("Cleared...");
+		//verbose("Cleared...");
 		
 		win.draw(renderer);
-		//trace("Drawn...");
+		//verbose("Drawn...");
 		
 		renderer.swap();
-		//trace("Swapped...");
+		//verbose("Swapped...");
 	}
 	
 	return dim::OK;

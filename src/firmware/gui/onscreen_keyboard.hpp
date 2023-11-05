@@ -35,14 +35,14 @@ namespace dim {
 			void shift();
 			void change();
 			void backspace ();
-			void enter_char(const char* c);
+			void enter_char(const std::string &value_name);
 			void enter();
 			void cancel();
 			void clear();
 			
-			std::function<void()> simple_key_func(const char* c);
-			void add_key(uint32_t type, std::string text, std::function<void()> func, float col, uint32_t row, float width = 1);
-			void add_simple_key(uint32_t type, const char *text, float col, uint32_t row);
+			std::function<void()> simple_key_func(const std::string &value_name);
+			void add_key(uint32_t type, const std::string &value_name, std::function<void()> func, float col, uint32_t row, float width = 1);
+			void add_simple_key(uint32_t type, const std::string &value_name, float col, uint32_t row);
 			
 		public:
 			onscreen_keyboard(window &window, model::model &model);

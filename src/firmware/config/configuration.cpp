@@ -33,20 +33,20 @@ template<typename T>
 T configuration::operator()(std::string name, T value)
 {
 	ftrace();
-	trace("CONFIG LOOKUP: %s", name.c_str());
+	verbose("CONFIG LOOKUP: %s", name.c_str());
 	// walk through the path
 	YAML::Node current = this->m_values;
 	std::string cname = name;
 	size_t found = std::string::npos;
 	while ((found = cname.find('.')) != std::string::npos) {
-		trace("CONFIG LOOKUP ITER: %s <==> %s", cname.c_str(), cname.substr(0, found));
+		verbose("CONFIG LOOKUP ITER: %s <==> %s", cname.c_str(), cname.substr(0, found));
 		if (!current[cname.substr(0, found)]) {
 			current[cname.substr(0, found)] = YAML::Node();
 		}
 		current = current[cname.substr(0, found)];
 		cname = cname.substr(found + 1, cname.size() - found - 1);
 	}
-	trace("CONFIG LOOKUP FINAL: %s", cname.c_str());
+	verbose("CONFIG LOOKUP FINAL: %s", cname.c_str());
 	if (current[cname]) return current[cname].as<T>(); // Note: this semicolon is correct, even if the msvc compiler doesn't seem to care about its absence???
 	
 	current[cname] = value;

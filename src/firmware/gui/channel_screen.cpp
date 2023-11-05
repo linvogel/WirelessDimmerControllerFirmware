@@ -16,8 +16,7 @@ channel_screen::channel_screen(renderer &renderer, window &window, model::model 
 	this->m_window.set_scene(this->m_scene);
 	this->m_window.add(&(this->m_name));
 	this->m_window.add(&(this->m_address));
-	this->m_address_knob.add(&(this->m_address_knob));
-	this->m_address_knob.draw(renderer);
+	this->m_window.add(&(this->m_address_knob));
 }
 
 
@@ -25,6 +24,9 @@ void channel_screen::show(const std::string &channel_prefix)
 {
 	ftrace();
 	this->m_name.set_value_name(channel_prefix + ".name");
+	this->m_name.set_callback([this, channel_prefix]() {
+		this->m_window.show_keyboard(channel_prefix + ".name");
+	});
 	this->m_address.set_value_name(channel_prefix + ".address");
 	this->m_address_knob.set_value_name(channel_prefix + ".address");
 	

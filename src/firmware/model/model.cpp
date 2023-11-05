@@ -248,36 +248,36 @@ model_value& model::operator[](const std::string &name)
 void model::load_category(const std::string &name, const std::string &filename)
 {
 	ftrace();
-	trace("Loading model category: '%s'", name.c_str());
+	verbose("Loading model category: '%s'", name.c_str());
 	std::ifstream input_stream(filename);
 	std::string line;
 	
 	// read file line by line
 	// every line is an entry in the model
 	while (std::getline(input_stream, line)) {
-		trace("Reading line: '%s'", line.c_str());
+		verbose("Reading line: '%s'", line.c_str());
 		if (line.size() == 0) {
-			trace("Line was empty");
+			verbose("Line was empty");
 			continue;
 		}
 		size_t offset = line.find('=', 0);
 		std::string path = name + "." + line.substr(0, offset);
-		trace("Found path: '%s'", path.c_str());
+		verbose("Found path: '%s'", path.c_str());
 		
 		// skip whitespace
 		while (++offset < line.size() && line.at(offset) == ' ' || line.at(offset) == '\t');
-		trace("Skipped whitespace");
+		verbose("Skipped whitespace");
 		
 		// check for empty value
 		if (offset >= line.size()) {
-			trace("Value was empty");
+			verbose("Value was empty");
 			this->add(path, 0);
 			continue;
 		}
 		
 		// check for string
 		if (line.at(offset) == '"') {
-			trace("Found string value");
+			verbose("Found string value");
 			// this is a string value
 			offset++;
 			size_t end = offset;
@@ -302,9 +302,9 @@ void model::load_category(const std::string &name, const std::string &filename)
 				}
 			}
 			
-			trace("Read string value: '%s'", string_value.c_str());
+			verbose("Read string value: '%s'", string_value.c_str());
 			this->add(path, string_value);
-			trace("Added value to model");
+			verbose("Added value to model");
 		} else {
 			// this must be a number
 			if (line.find('.', offset) != std::string::npos || line.find('e', offset) != std::string::npos || line.find('E', offset) != std::string::npos) {
