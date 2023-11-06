@@ -19,7 +19,7 @@ namespace dim {
 			size_t m_scene;
 			button m_name;
 			label m_address;
-			knob m_address_knob;
+			knob<uint8_t, 0, 255> m_address_knob;
 			
 		public:
 			channel_screen(renderer &renderer, window &window, model::model &model);

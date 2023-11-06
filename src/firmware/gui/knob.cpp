@@ -1,15 +1,20 @@
 #include "knob.hpp"
 
+#include <cmath>
+#include <limits>
+
 #define MODULE_NAME "knob"
 #include "../logging.hpp"
 
-#include <cmath>
 
 using namespace dim::gui;
 using namespace dim::math;
 
+template class knob<uint8_t, 0, 255>;
+template class knob<float, 0.0f, 1.0f>;
 
-knob::knob(model::model &model, std::string value_name, renderer &renderer, float x, float y, float size)
+template<typename T, T MIN, T MAX>
+knob<T, MIN, MAX>::knob(model::model &model, std::string value_name, renderer &renderer, float x, float y, float size)
 	: component(x, y, 1.0f, 1.0f, 0.0f, size, size)
 	, m_knob(renderer, 5, 5, size-5, 5, size-5, size-5, 5, size-5)
 	, m_model(model)
@@ -28,6 +33,7 @@ knob::knob(model::model &model, std::string value_name, renderer &renderer, floa
 	m_knob.set_texture(new texture(renderer, "rotary_knob"));
 	m_knob.update_uv();
 	
+	this->m_start_angle = 0;
 	this->m_min_angle = static_cast<float>(-0.7 * PI);
 	this->m_max_angle = static_cast<float>(0.7 * PI);
 	this->m_sensitivity = 0.01f;
@@ -37,19 +43,23 @@ knob::knob(model::model &model, std::string value_name, renderer &renderer, floa
 	this->m_alpha_max = { std::sin(this->m_max_angle), std::cos(this->m_max_angle) };
 }
 
-void knob::set_value_name(const std::string &value_name)
+template<typename T, T MIN, T MAX>
+void knob<T, MIN, MAX>::set_value_name(const std::string &value_name)
 {
 	ftrace();
 	this->m_value_name = value_name;
 }
 
-void knob::draw_component(renderer &renderer)
+template<typename T, T MIN, T MAX>
+void knob<T, MIN, MAX>::draw_component(renderer &renderer)
 {
 	ftrace();
 	unsigned int program = this->m_shape->get_special_program();
 	renderer.set_program(program);
 	
-	float angle = static_cast<float>(this->m_model[this->m_value_name]); // TODO: this should probably be translated a bit
+	T value = static_cast<T>(this->m_model[this->m_value_name]);
+	float interpolation = 1.0f - static_cast<float>(value - MIN) / static_cast<float>(MAX - MIN);
+	float angle = this->m_min_angle + interpolation * (this->m_max_angle - this->m_min_angle);
 	
 	renderer.set_uniform_scalar(program, "u_angle", -angle);
 	vector4f bounds = {
@@ -72,23 +82,31 @@ void knob::draw_component(renderer &renderer)
 	renderer.pop_proj();
 }
 
-void knob::onMouseMove(float x, float y)
+template<typename T, T MIN, T MAX>
+void knob<T, MIN, MAX>::onMouseMove(float x, float y)
 {
 	ftrace();
 	if (this->m_grabbed) {
-		this->m_model[this->m_value_name] = std::min(std::max(this->m_start_angle + (y - this->m_mousey)*this->m_sensitivity, this->m_min_angle), this->m_max_angle);
+		float angle = std::min(std::max(this->m_start_angle + (y - this->m_mousey)*this->m_sensitivity, this->m_min_angle), this->m_max_angle);
+		float interpolation = 1.0f - (angle - this->m_min_angle) / (this->m_max_angle - this->m_min_angle);
+		float value = static_cast<float>(MIN) + interpolation * static_cast<float>(MAX - MIN);
+		this->m_model[this->m_value_name] = static_cast<T>(std::round(value));
 	}
 }
 
-void knob::onLeftMouseDown(float x, float y)
+template<typename T, T MIN, T MAX>
+void knob<T, MIN, MAX>::onLeftMouseDown(float x, float y)
 {
 	ftrace();
 	this->m_mousey = y;
-	this->m_start_angle = static_cast<float>(this->m_model[this->m_value_name]);
+	T value = static_cast<T>(this->m_model[this->m_value_name]);
+	float interpolation = 1.0f - static_cast<float>(value - MIN) / static_cast<float>(MAX - MIN);
+	this->m_start_angle = this->m_min_angle + interpolation * (this->m_max_angle - this->m_min_angle);
 	this->m_grabbed = true;
 }
 
-void knob::onLeftMouseUp(float x, float y)
+template<typename T, T MIN, T MAX>
+void knob<T, MIN, MAX>::onLeftMouseUp(float x, float y)
 {
 	ftrace();
 	this->m_grabbed = false;
