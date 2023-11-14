@@ -1,10 +1,10 @@
 #pragma once
 
+#include "../util/custom_array.hpp"
+
 #include "../math/matrix.hpp"
 #include "renderer.hpp"
 #include "texture.hpp"
-
-#include "../util/custom_array.hpp"
 
 const int N_VERT_CIRCLE = 32;
 

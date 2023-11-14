@@ -1,22 +1,22 @@
 #pragma once
 
 #include "component.hpp"
+#include "model/model.hpp"
 
 namespace dim {
 	namespace gui {
 		
 		class label : public virtual component {
-			std::string m_string;
+			model::model &m_model;
+			std::string m_value_name;
 			float m_font_size;
 			
 		public:
-			label(renderer &renderer, float x, float y, float w, float h, std::string string, float font_size);
+			label(model::model &model, std::string m_value_name, renderer &renderer, float x, float y, float w, float h, float font_size);
 			
-			static component* from_yaml(renderer &renderer, YAML::Node root);
+			void set_value_name(const std::string &value_name);
 			
 			virtual void draw_component(renderer &renderer) override;
-			
-			virtual void set_text(std::string text);
 		};
 		
 	}

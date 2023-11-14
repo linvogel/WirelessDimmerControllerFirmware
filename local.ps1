@@ -10,7 +10,7 @@ if ($clean) {
 }
 
 if ($clean -or $cmake) {
-	cmake -S . -B $BUILD_DIR -DTARGET=local
+	cmake -S . -B $BUILD_DIR -DTARGET=local -DCMAKE_BUILD_TYPE=Debug
 }
 
 MSBuild.exe -maxcpucount:8 $BUILD_DIR/glfw/src/glfw.vcxproj

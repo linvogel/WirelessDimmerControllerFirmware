@@ -1,10 +1,12 @@
-#include "logging.hpp"
 
 #include <vector>
 #include <ctime>
 #include <chrono>
 #include <algorithm>
 #include <string.h>
+
+#define MODULE_NAME "logger"
+#include "logging.hpp"
 
 static std::vector<std::ostream*> out_streams;
 static std::vector<std::ostream*> err_streams;
@@ -15,7 +17,6 @@ static dim::log::log_level current_level = dim::log::TRACE;
 
 void dim::log::init()
 {
-	
 	out_streams.push_back(&std::cout);
 	err_streams.push_back(&std::cerr);
 	
@@ -59,8 +60,14 @@ void dim::log::_log(std::string mod_name, dim::log::log_level level, std::string
 	char buf_pre[256];
 	size_t printed_msg = vsnprintf(buf_msg, 64*1024, fmt.c_str(), args);
 	size_t printed_pre = snprintf(buf_pre, 256, "[%s.%03d][%s][%s] ", date_time, (int)(millis.count() % 1000), mod_name.c_str(), level_names[level].c_str());
-	if (printed_msg <= 0 || printed_msg >= 64*1024) error("Log message exceeded 64KB! Please enuse that log messages are strictly smaller in size than 64KB!");
-	if (printed_pre <= 0 || printed_pre >= 256) fatal("failed to print prefix size!");
+	if (printed_msg <= 0 || printed_msg >= 64*1024) {
+		error("Log message exceeded 64KB! Please enuse that log messages are strictly smaller in size than 64KB!");
+		return;
+	}
+	if (printed_pre <= 0 || printed_pre >= 256) {
+		fatal("failed to print prefix size!");
+		return;
+	}
 	
 	for (int i = 0; i < out_streams.size(); i++) *out_streams[i] << buf_pre << buf_msg << std::endl;
 	if (level <= dim::log::WARNING) for (int i = 1; i < err_streams.size(); i++) *err_streams[i] << buf_pre << buf_msg << std::endl;

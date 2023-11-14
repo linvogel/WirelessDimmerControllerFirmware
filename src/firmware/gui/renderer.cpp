@@ -1,14 +1,11 @@
 #include "renderer.hpp"
 #include "../errors.hpp"
 
-#ifdef MODULE_NAME
-#undef MODULE_NAME
-#endif
-#define MODULE_NAME "renderer"
-#include "../logging.hpp"
-
 #include <fstream>
 #include <cmath>
+
+#define MODULE_NAME "renderer"
+#include "../logging.hpp"
 
 using namespace dim::gui;
 
@@ -18,7 +15,7 @@ using namespace dim::gui;
 	x;\
 	unsigned int result = glGetError();\
 	if (result != GLEW_OK) {\
-		error("OpenGL ERROR: %s", glewGetErrorString(result));\
+		error("OpenGL ERROR: %s (0x%x)", glewGetErrorString(result), result);\
 	}\
 }
 #else
@@ -27,6 +24,7 @@ using namespace dim::gui;
 
 renderer::renderer(GLFWwindow *window)
 {
+	ftrace();
 	this->m_font_atlas = 0;
 	this->m_window = window;
 	glfwMakeContextCurrent(this->m_window);
@@ -66,10 +64,12 @@ renderer::renderer(GLFWwindow *window)
 	GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 	
 	GL_CALL(glGenBuffers(1, &(this->m_text_vertex_buffer)));
+	debug("Renderer initialized successfully");
 }
 
 void renderer::init_text_rendering()
 {
+	ftrace();
 	debug("Initializing text rendering...");
 	
 	FT_Library ft;
@@ -151,11 +151,12 @@ void renderer::init_text_rendering()
 
 renderer::~renderer()
 {
-
+	ftrace();
 }
 
 unsigned int renderer::create_2d_float_vertex_buffer_simple(size_t size, custom_array<float> &data)
 {
+	ftrace();
 	unsigned int buffer;
 	GL_CALL(glGenBuffers(1, &buffer));
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
@@ -168,16 +169,16 @@ unsigned int renderer::create_2d_float_vertex_buffer_simple(size_t size, custom_
 
 void renderer::update_buffer(unsigned int buffer, size_t size, custom_array<float> &data)
 {
-	trace("renderer::update_buffer");
+	ftrace();
 	if (buffer != 0) {
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
 		GL_CALL(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data.get(), GL_STATIC_DRAW));
 	}
-	trace("renderer::update_buffer done.");
 }
 
 static int compileShader(unsigned int type, const std::string &file_name)
 {
+	ftrace();
 	unsigned int id;
 	GL_CALL(id = glCreateShader(type));
 	std::string source = "";
@@ -214,6 +215,7 @@ static int compileShader(unsigned int type, const std::string &file_name)
 
 int renderer::createShader(const std::string &vertex_shader_file, const std::string &fragment_shader_file)
 {
+	ftrace();
 	unsigned int program;
 	GL_CALL(program = glCreateProgram());
 	unsigned int vs = compileShader(GL_VERTEX_SHADER, vertex_shader_file);
@@ -232,6 +234,7 @@ int renderer::createShader(const std::string &vertex_shader_file, const std::str
 
 void renderer::reset()
 {
+	ftrace();
 	this->m_proj_stack.clear();
 	this->m_view_stack.clear();
 	this->m_model_stack.clear();
@@ -248,73 +251,87 @@ void renderer::reset()
 
 void renderer::wait()
 {
+	ftrace();
 	glfwWaitEvents();
 }
 
 void renderer::wait(double timeout)
 {
+	ftrace();
 	glfwWaitEventsTimeout(timeout);
 }
 
 void renderer::poll()
 {
+	ftrace();
 	glfwPollEvents();
 }
 
 void renderer::swap()
 {
+	ftrace();
 	glfwSwapBuffers(this->m_window);
 }
 
 void renderer::set_swap_interval(int i)
 {
+	ftrace();
 	glfwSwapInterval(i);
 }
 
 void renderer::push_proj()
 {
+	ftrace();
 	this->m_proj_stack.push_back(this->m_proj_stack.back());
 	push_rotation();
 }
 
 void renderer::pop_proj()
 {
+	ftrace();
 	if (this->m_proj_stack.size() > 1) this->m_proj_stack.pop_back();
 	pop_rotation();
 }
 
 void renderer::push_view()
 {
+	ftrace();
 	this->m_view_stack.push_back(this->m_view_stack.back());
 }
 
 void renderer::pop_view()
 {
+	ftrace();
 	if (this->m_view_stack.size() > 1) this->m_view_stack.pop_back();
 }
 
 void renderer::push_model()
 {
+	ftrace();
 	this->m_model_stack.push_back(this->m_model_stack.back());
 }
 
 void renderer::pop_model()
 {
+	ftrace();
 	if (this->m_model_stack.size() > 1) this->m_model_stack.pop_back();
 }
 
 void renderer::push_rotation()
 {
+	ftrace();
 	this->m_rotation_stack.push_back(this->m_rotation_stack.back());
 }
 
 void renderer::pop_rotation()
 {
+	ftrace();
 	if (this->m_rotation_stack.size() > 1) this->m_rotation_stack.pop_back();
 }
 
 void renderer::ortho(float left, float right, float bottom, float top, float near, float far)
 {
+	ftrace();
 	matrix4f mat = {
 		(float)(2.0 / (right - left)), 0.0,                               0.0,                          -((right + left) / (right - left)),
 		0.0,                           (float)(2.0 / (top - bottom)),     0.0,                          -((top + bottom) / (top - bottom)),
@@ -328,6 +345,7 @@ void renderer::ortho(float left, float right, float bottom, float top, float nea
 
 void renderer::update_mvp()
 {
+	ftrace();
 	this->mvp = this->m_proj_stack.back() * this->m_view_stack.back() * this->m_model_stack.back();
 	int location;
 	GL_CALL(location = glGetUniformLocation(this->m_current_program, "MVP"));
@@ -336,6 +354,7 @@ void renderer::update_mvp()
 
 void renderer::reload_mvp()
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(this->m_current_program, "MVP"));
 	if (location != -1) GL_CALL(glUniformMatrix4fv(location, 1, GL_TRUE, this->mvp.get_data()));
@@ -343,6 +362,7 @@ void renderer::reload_mvp()
 
 void renderer::transform(vector2f pos, float angle, vector2f scale)
 {
+	ftrace();
 	this->scale(scale, false);
 	this->rotate(angle, false);
 	this->translate(pos, true);
@@ -350,6 +370,7 @@ void renderer::transform(vector2f pos, float angle, vector2f scale)
 
 void renderer::translate(vector2f position, bool update_uniform_mvp)
 {
+	ftrace();
 	matrix4f mat = matrix4f::identity();
 	vector4f pos = { position(0), position(1), 0, 0 };
 	pos = this->m_proj_stack.back() * pos;
@@ -363,6 +384,7 @@ void renderer::translate(vector2f position, bool update_uniform_mvp)
 
 void renderer::rotate(float angle, bool update_uniform_mvp)
 {
+	ftrace();
 	matrix4f mat = matrix4f::identity();
 	float s = static_cast<float>(std::sin(static_cast<double>(angle)));
 	float c = static_cast<float>(std::cos(static_cast<double>(angle)));
@@ -381,6 +403,7 @@ void renderer::rotate(float angle, bool update_uniform_mvp)
 
 void renderer::scale(vector2f scale, bool update_uniform_mvp)
 {
+	ftrace();
 	matrix4f mat = matrix4f::identity();
 	mat(0, 0) = scale(0);
 	mat(1, 1) = scale(1);
@@ -392,11 +415,13 @@ void renderer::scale(vector2f scale, bool update_uniform_mvp)
 
 void renderer::clear()
 {
+	ftrace();
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void renderer::draw_shape(shape2 *shape)
 {
+	ftrace();
 	if (shape->m_buffer == 0) {
 		error("cannot render buffer, buffer not initialized on gpu!");
 		return;
@@ -499,6 +524,7 @@ void renderer::draw_shape(shape2 *shape)
 
 vector2f renderer::get_text_size(std::string text, float size)
 {
+	ftrace();
 	float minx = size;
 	float maxx = 0;
 	float miny = size;
@@ -522,6 +548,7 @@ vector2f renderer::get_text_size(std::string text, float size)
 
 void renderer::draw_text_centered(std::string text, float x, float y, float size)
 {
+	ftrace();
 	const float size_factor = size / 96.0f;
 	this->m_current_program = this->m_text_program;
 	glUseProgram(this->m_current_program);
@@ -543,7 +570,7 @@ void renderer::draw_text_centered(std::string text, float x, float y, float size
 	vector2f rendered_size = this->get_text_size(text, size);
 	
 	float offset_x = x - rendered_size(0) * 0.5f;
-	float offset_y = y + rendered_size(1) * 0.5f;
+	float offset_y = y + size * 0.3f;
 	
 	for (char c : text) {
 		const glyph &g = this->m_font_map[c];
@@ -579,6 +606,7 @@ void renderer::draw_text_centered(std::string text, float x, float y, float size
 
 unsigned int renderer::create_texture(uint8_t *data, int width, int height, int bpp, int channels)
 {
+	ftrace();
 	verbose("Creating texture...");
 	unsigned int texture;
 	GL_CALL(glGenTextures(1, &texture));
@@ -594,12 +622,14 @@ unsigned int renderer::create_texture(uint8_t *data, int width, int height, int 
 
 void renderer::set_program(unsigned int program)
 {
+	ftrace();
 	this->m_current_program = program;
 	GL_CALL(glUseProgram(this->m_current_program));
 }
 
 void renderer::set_uniform_scalar(unsigned int program, const char* name, float value)
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniform1f(location, value));
@@ -607,6 +637,7 @@ void renderer::set_uniform_scalar(unsigned int program, const char* name, float 
 
 void renderer::set_uniform_vec2(unsigned int program, const char* name, float *value)
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniform2fv(location, 1, value));
@@ -614,6 +645,7 @@ void renderer::set_uniform_vec2(unsigned int program, const char* name, float *v
 
 void renderer::set_uniform_vec3(unsigned int program, const char* name, float *value)
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniform3fv(location, 1, value));
@@ -621,6 +653,7 @@ void renderer::set_uniform_vec3(unsigned int program, const char* name, float *v
 
 void renderer::set_uniform_vec4(unsigned int program, const char* name, float *value)
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniform4fv(location, 1, value));
@@ -628,6 +661,7 @@ void renderer::set_uniform_vec4(unsigned int program, const char* name, float *v
 
 void renderer::set_uniform_mat2(unsigned int program, const char* name, float *value)
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE, value));
@@ -635,6 +669,7 @@ void renderer::set_uniform_mat2(unsigned int program, const char* name, float *v
 
 void renderer::set_uniform_mat3(unsigned int program, const char* name, float *value)
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE, value));
@@ -642,6 +677,7 @@ void renderer::set_uniform_mat3(unsigned int program, const char* name, float *v
 
 void renderer::set_uniform_mat4(unsigned int program, const char* name, float *value)
 {
+	ftrace();
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, value));

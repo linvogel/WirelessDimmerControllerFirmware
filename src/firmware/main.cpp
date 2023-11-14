@@ -1,10 +1,9 @@
 #include <iostream>
+#include <fstream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#define MODULE_NAME "main"
-#include "logging.hpp"
 #include "errors.hpp"
 
 #include "math/matrix.hpp"
@@ -16,78 +15,133 @@
 #include "gui/knob.hpp"
 #include "gui/label.hpp"
 
-#include "gui/guibuilder.hpp"
+#include "gui/onscreen_keyboard.hpp"
+#include "gui/channel_screen.hpp"
+
+#include "shell/shell.hpp"
+
+#define MODULE_NAME "main"
+#include "logging.hpp"
+
 
 using namespace dim::gui;
 using namespace dim::in;
+using namespace dim::model;
+using namespace dim::sh;
 
+void load_config(model &mod)
+{
+	ftrace();
+	info("Loading configuration...");
+	// first load configuration file
+	mod.load_category("cfg", "config.cfg");
+	
+	// determine language selected by the configuration
+	debug("Detecting language selection...");
+	if (!mod.contains_key("lang")) {
+		warn("Configuration does not contain language selection. Defaulting to english...");
+		mod.add("lang", "english");
+	}
+	debug("Loading language file...");
+	std::string lang_filename = std::string("lang/") + static_cast<std::string>(mod["lang"]) + std::string(".cfg");
+	mod.load_category("language", lang_filename);
+	
+	// load scene file
+	debug("Detecting scene selection...");
+	if (!mod.contains_key("scene")) {
+		warn("Configuration does not contain scene selection. Defaulting to scene0...");
+		mod.add("scene", "scene0");
+	}
+	debug("Loading scene file...");
+	std::string scene_filename = std::string("scene/") + static_cast<std::string>(mod["scene"]) + std::string(".cfg");
+	mod.load_category("scene", scene_filename);
+	
+	info("Config ready!");
+}
+
+void save_config(model &mod)
+{
+	ftrace();
+	info("Saving configuration...");
+	
+	// TODO: device state file
+	
+	// determine language and save language file
+	debug("Saving language...");
+	std::string lang_filename = std::string("lang/") + static_cast<std::string>(mod["lang"]) + std::string(".cfg");
+	mod.save_category("language", lang_filename);
+	
+	// save main config file
+	mod.save_category("cfg", "config.cfg");
+	
+	info("Configuration saved!");
+}
 
 int main()
 {
 	dim::log::init();
+	dim::log::set_log_level(dim::log::VERBOSE);
 	info("Starting DimmerControllerFirmware...");
 	
 	/**
 	 * TODO:
-	 *  - Start model thread
-	 *  - Start Interface Thread
 	 *  - Start View Thread
+	 *  - Start Controller Thread
 	 *  - monitor activity
 	 *  - wait for other threads
 	 * 
-	 * This will be the architecture later when model, view and interface threads are ready themselves
+	 * This will be the architecture later when view and controller threads are ready themselves
 	 * 
 	 */
 	
+	// load the configuration
+	model mod;
+	load_config(mod);
+	
 	// create window object and prepare interfaces
-	window window("Dimmer Controller", 800, 480);
-	renderer &renderer = window.get_renderer();
-	input_controller &input_controller = window.get_input_ctrl();
+	debug("Setting up GUI...");
+	debug("Creating main window...");
+	window win("Dimmer Controller", 800, 480);
+	renderer &renderer = win.get_renderer();
 	
-	vector4f cols[5] = {
-		{0.0f, 0.0f, 0.0f, 1.0f},
-		{1.0f, 0.0f, 0.0f, 1.0f},
-		{0.0f, 1.0f, 0.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f, 1.0f},
-		{1.0f, 1.0f, 1.0f, 1.0f}
-	};
-	int count = 0;
+	debug("Creating screens...");
+	onscreen_keyboard okbd(win, mod);
+	channel_screen ch_screen(renderer, win, mod);
 	
-	//button btn1("Button", [&]() { renderer.text_color = cols[count++ % 5]; }, renderer, 10, 10, 150, 30);
-	//button btn2("Mute", []() { std::cout << "btn2 pressed" << std::endl; }, renderer, 10, 50, 150, 30);
-	//
-	//slider sld1(renderer, 300, 200, 60, 280, 0, 1);
-	//
-	//knob kn1(renderer, 500, 100, 100);
-	//
-	//label lbl1(renderer, 100, 400, 200, 30, "hello, world", 16);
-	//
-	//panel pnl1(renderer, 100, 100, 170, 90);
-	//
-	//window.add(&kn1);
-	//window.add(&pnl1);
-	//window.add(&sld1);
-	//window.add(&lbl1);
-	//pnl1.add(&btn1);
-	//pnl1.add(&btn2);
+	debug("Attaching screens to window");
+	win.set_keyboard(&okbd);
+	win.set_channel_screen(&ch_screen);
 	
-	component *content = dim::gui_builder::build_gui_from_file(renderer, "gui.yml");
-	window.add(content);
+	win.show_channel_screen("scene.channel_0");
 	
+	input_controller &input_controller = win.get_input_ctrl();
+	
+	
+	
+	debug("Setting up renderer...");
 	renderer.set_swap_interval(1);
 	
-	while (!window.shoud_close()) {
-		//trace("Render cycle...");
+	// save the config again, to store any defaults that got inserted
+	save_config(mod);
+	
+	// setting up shell
+	debug("Setting up shell...");
+	shell shell(win);
+	
+	info("Setup complete, entering draw loop...");
+	
+	while (!win.shoud_close()) {
+		verbose("Render cycle...");
 		renderer.wait(0.25);
-		//trace("Waited...");
+		//verbose("Waited...");
 		renderer.clear();
-		//trace("Cleared...");
+		//verbose("Cleared...");
 		
-		window.draw(renderer);
-		//trace("Drawn...");
+		win.draw(renderer);
+		//verbose("Drawn...");
 		
 		renderer.swap();
-		//trace("Swapped...");
+		//verbose("Swapped...");
 	}
 	
 	return dim::OK;

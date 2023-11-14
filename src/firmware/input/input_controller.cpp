@@ -11,6 +11,7 @@ std::map<GLFWwindow*,dim::in::input_controller*> s_controllers;
 
 void s_key_callback(GLFWwindow *win, int key, int scancode, int action, int mods)
 {
+	ftrace();
 	auto it = s_controllers.find(win);
 	if (it != s_controllers.end()) s_controllers.at(win)->key_callback(key, scancode, action, mods);
 	else warn("glfwKeyCallback cannot be handled.");
@@ -18,6 +19,7 @@ void s_key_callback(GLFWwindow *win, int key, int scancode, int action, int mods
 
 void s_cursor_pos_callback(GLFWwindow *win, double x, double y)
 {
+	ftrace();
 	auto it = s_controllers.find(win);
 	if (it != s_controllers.end()) s_controllers.at(win)->mouse_callback(x, y);
 	else warn("glfwCursorPosCallback cannot be handled.");
@@ -25,6 +27,7 @@ void s_cursor_pos_callback(GLFWwindow *win, double x, double y)
 
 void s_mouse_button_callback(GLFWwindow *win, int button, int action, int mods)
 {
+	ftrace();
 	auto it = s_controllers.find(win);
 	if (it != s_controllers.end()) s_controllers.at(win)->mouse_button_callback(button, action, mods);
 	else warn("glfwMouseButtonCallback cannot be handled.");
@@ -32,6 +35,7 @@ void s_mouse_button_callback(GLFWwindow *win, int button, int action, int mods)
 
 dim::in::input_controller::input_controller()
 {
+	ftrace();
 	this->m_window = nullptr;
 	this->m_comp = nullptr;
 
@@ -43,6 +47,7 @@ dim::in::input_controller::input_controller()
 
 dim::in::input_controller::input_controller(GLFWwindow *window, dim::gui::component *comp)
 {
+	ftrace();
 	this->m_window = window;
 	this->m_comp = comp;
 	debug("Creating input_controller: %p", window);
@@ -61,6 +66,7 @@ dim::in::input_controller::input_controller(GLFWwindow *window, dim::gui::compon
 
 dim::in::input_controller::~input_controller()
 {
+	ftrace();
 	if (this->m_window != nullptr) {
 		s_controllers.erase(this->m_window);
 		debug("Erasing input_controller: %p", this->m_window);
@@ -69,6 +75,7 @@ dim::in::input_controller::~input_controller()
 
 void dim::in::input_controller::key_callback(int key, int scancode, int action, int mods)
 {
+	ftrace();
 	if (action == GLFW_PRESS) {
 		if (this->m_comp->get_focussed()) this->m_comp->get_focussed()->onKeyPressed(key, mods);
 	} else if (action == GLFW_REPEAT) {
@@ -81,6 +88,7 @@ void dim::in::input_controller::key_callback(int key, int scancode, int action, 
 
 void dim::in::input_controller::mouse_callback(double x, double y)
 {
+	ftrace();
 	component* old = this->m_comp->hit_children(this->m_mousex, this->m_mousey);
 	float oldx = this->m_mousex;
 	float oldy = this->m_mousey;
@@ -115,6 +123,7 @@ void dim::in::input_controller::mouse_callback(double x, double y)
 
 void dim::in::input_controller::mouse_button_callback(int button, int action, int mods)
 {
+	ftrace();
 	if (action == GLFW_PRESS) {
 		// mark button as pressed
 		this->m_buttons[button] = true;

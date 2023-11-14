@@ -4,20 +4,23 @@
 #include <functional>
 #include <string>
 
+#include <model/model.hpp>
+
 namespace dim {
 	namespace gui {
 		
 		class button : public virtual component {
 			std::function<void()> m_func;
-			std::string m_text;
+			model::model &m_model;
+			std::string m_value_name;
 			
 			renderer &m_renderer;
 			
 			vector4f m_act_color;
 		public:
-			button(std::string text, std::function<void()> func, renderer &renderer, float x, float y, float w, float h);
+			button(model::model &model, std::string value_name, std::function<void()> func, renderer &renderer, float x, float y, float w, float h);
 			
-			static component* from_yaml(renderer &renderer, YAML::Node root);
+			void set_value_name(const std::string &value_name);
 			
 			virtual void set_callback(std::function<void()> func);
 			

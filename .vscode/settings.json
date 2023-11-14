@@ -108,9 +108,10 @@
 		"any": "cpp",
 		"queue": "cpp",
 		"stack": "cpp",
-		"valarray": "cpp"
+		"valarray": "cpp",
+		"hash_map": "cpp"
 	},
 	"C_Cpp.default.cppStandard": "c++23",
 	"C_Cpp.default.cStandard": "c17",
-	"C_Cpp.errorSquiggles": "enabled"
+	"C_Cpp.errorSquiggles": "disabled",
 }
