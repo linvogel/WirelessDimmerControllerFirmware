@@ -75,7 +75,15 @@ namespace dim {
 			 * 
 			 * @param render The renderer instance to use.
 			 */
-			virtual void draw(renderer &renderwe) final;
+			virtual void draw(renderer &renderer) final;
+			
+			/**
+			 * @brief Draw the selection markings. This function can be overridden for
+			 * a custom selection marking that is not the standard rounded rectangle
+			 * 
+			 * @param renderer The renderer instance to use
+			 */
+			virtual void draw_selected(renderer &renderer);
 			
 			/**
 			 * @brief The draw component function draws this component to the canvas before its
@@ -88,9 +96,10 @@ namespace dim {
 			virtual void set_shape(std::shared_ptr<shape2> shape) { this->m_shape = shape; }
 			virtual std::shared_ptr<shape2> get_shape() { return this->m_shape; }
 			
+			virtual bool focussable() { return false; }
 			virtual vector2f get_position() { return this->m_position; }
 			virtual component* get_focussed() { return this->m_focussed; }
-			virtual void focus(component* comp) { this->m_focussed = comp; }
+			virtual void focus(component* comp) { if (comp->focussable()) this->m_focussed = comp; }
 			virtual bool hit(float local_x, float local_y); 
 			virtual component* hit_children(float local_x, float local_y); 
 			

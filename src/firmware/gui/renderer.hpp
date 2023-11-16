@@ -44,8 +44,11 @@ namespace dim {
 			std::vector<matrix4f> m_rotation_stack;
 			matrix4f mvp;
 			
+			std::map<std::string, void*> m_named_frame_data;
+			
 			unsigned int m_current_program;
 			unsigned int m_base_program;
+			unsigned int m_scale_base_program;
 			unsigned int m_text_program;
 			unsigned int m_texture_program;
 			unsigned int m_knob_program;
@@ -72,6 +75,7 @@ namespace dim {
 			void update_buffer(unsigned int buffer, size_t size, custom_array<float> &data);
 			
 			unsigned int get_base_program() { return this->m_base_program; }
+			unsigned int get_scale_base_program() { return this->m_scale_base_program; }
 			unsigned int get_texture_program() { return this->m_texture_program; }
 			unsigned int get_knob_program() { return this->m_knob_program; }
 			
@@ -116,6 +120,11 @@ namespace dim {
 			
 			vector2f get_text_size(std::string text, float size);
 			
+			void clear_frame_data();
+			void set_frame_data(const std::string &name, void* data);
+			void* get_frame_data(const std::string &name);
+			
+			void draw_shape_outline(shape2 *shape);
 			void draw_shape(shape2 *shape);
 			void draw_text_centered(std::string text, float x, float y, float size);
 		};

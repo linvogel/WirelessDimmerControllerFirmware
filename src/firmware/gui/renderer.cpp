@@ -51,6 +51,7 @@ renderer::renderer(GLFWwindow *window)
 	
 	info("Loading shaders...");
 	this->m_base_program = this->createShader("shaders/basic.vert.glsl", "shaders/basic.frag.glsl");
+	this->m_scale_base_program = this->createShader("shaders/scale.vert.glsl", "shaders/scale.frag.glsl");
 	this->m_text_program = this->createShader("shaders/font.vert.glsl", "shaders/font.frag.glsl");
 	this->m_texture_program = this->createShader("shaders/texture.vert.glsl", "shaders/texture.frag.glsl");
 	this->m_knob_program = this->createShader("shaders/knob.vert.glsl", "shaders/knob.frag.glsl");
@@ -419,6 +420,70 @@ void renderer::clear()
 	GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
+void renderer::draw_shape_outline(shape2 *shape)
+{
+	ftrace();
+	if (shape->m_buffer == 0) {
+		error("cannot render buffer, buffer not initialized on gpu!");
+		return;
+	}
+	
+	this->m_current_program = this->m_scale_base_program;
+	GL_CALL(glUseProgram(this->m_current_program));
+	
+	this->reload_mvp();
+	
+	// TODO: this should be configurable
+	vector4f selected_stroke_color{1.0f, 0.0f, 0.872f, 1.0f};
+	float scale = 10.0f;
+	float cx = shape->m_bounds.x + shape->m_bounds.w / 2.0f;
+	float cy = shape->m_bounds.y + shape->m_bounds.h / 2.0f;
+	
+	int location;
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_corner_radius"));
+	GL_CALL(glUniform1f(location, shape->m_corner_radius));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_bounds"));
+	GL_CALL(glUniform4f(location, shape->m_bounds.x + shape->m_offset(0), shape->m_bounds.y + shape->m_offset(1), shape->m_bounds.w, shape->m_bounds.h));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_edge_smoothness"));
+	GL_CALL(glUniform1f(location, shape->m_edge_smoothness));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_weight"));
+	GL_CALL(glUniform1f(location, shape->m_stroke_weight));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_stroke_color"));
+	GL_CALL(glUniform4fv(location, 1, selected_stroke_color.get_data()));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_center"));
+	GL_CALL(glUniform2f(location, cx, cy));
+	GL_CALL(location = glGetUniformLocation(this->m_current_program, "u_scale"));
+	GL_CALL(glUniform1f(location, scale));
+	
+	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, shape->m_buffer));
+	GL_CALL(glBufferData(GL_ARRAY_BUFFER, shape->size() * sizeof(float), shape->data().get(), GL_STREAM_DRAW));
+	GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (const void*)0));
+	GL_CALL(glEnableVertexAttribArray(0));
+	line2 *line;
+	triang2 *tri;
+	quad2 *quad;
+	circle2 *circle;
+	
+	if (line = dynamic_cast<line2*>(shape)) {
+		// draw line
+		GL_CALL(glDrawArrays(GL_LINES, 0, 2));
+	} else if (tri = dynamic_cast<triang2*>(shape)) {
+		// draw triangle
+		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 3));
+	} else if (quad = dynamic_cast<quad2*>(shape)) {
+		// draw quad
+		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 6));
+	} else if (circle = dynamic_cast<circle2*>(shape)) {
+		// draw circle
+		GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, N_VERT_CIRCLE + 2));
+	} else {
+		warn("Invalid shape type!");
+	}
+	
+	GL_CALL(glDisableVertexAttribArray(0));
+	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+}
+
 void renderer::draw_shape(shape2 *shape)
 {
 	ftrace();
@@ -681,4 +746,22 @@ void renderer::set_uniform_mat4(unsigned int program, const char* name, float *v
 	int location;
 	GL_CALL(location = glGetUniformLocation(program, name));
 	GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, value));
+}
+
+void renderer::clear_frame_data()
+{
+	ftrace();
+	this->m_named_frame_data.clear();
+}
+
+void renderer::set_frame_data(const std::string &name, void* data)
+{
+	ftrace();
+	this->m_named_frame_data.insert(std::make_pair(name, data));
+}
+
+void* renderer::get_frame_data(const std::string &name)
+{
+	ftrace();
+	return this->m_named_frame_data.at(name);
 }

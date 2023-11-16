@@ -132,6 +132,9 @@ int main()
 	
 	while (!win.shoud_close()) {
 		verbose("Render cycle...");
+		renderer.clear_frame_data();
+		renderer.set_frame_data("focussed", win.get_focussed());
+		
 		renderer.wait(0.25);
 		//verbose("Waited...");
 		renderer.clear();

@@ -55,6 +55,14 @@ void component::remove_child(component *comp)
 	}
 }
 
+void component::draw_selected(renderer &renderer)
+{
+	ftrace();
+	if (this->m_shape.get()) {
+		renderer.draw_shape_outline(this->m_shape.get());
+	}
+}
+
 void component::draw_component(renderer &renderer)
 {
 	ftrace();
@@ -69,6 +77,9 @@ void component::draw(renderer &renderer)
 	this->draw_component(renderer);
 	for (component* comp : this->m_children) {
 		comp->draw(renderer);
+		if (renderer.get_frame_data("focussed") == static_cast<void*>(comp)) {
+			comp->draw_selected(renderer);
+		}
 	}
 	
 	renderer.pop_proj();
@@ -81,7 +92,6 @@ component* component::hit_children(float local_x, float local_y)
 		// TODO: scale and rotate local point
 		if (comp && comp->hit(local_x, local_y)) return comp->hit_children(local_x - comp->m_position(0), local_y - comp->m_position(1));
 	}
-	
 	return this;
 }
 

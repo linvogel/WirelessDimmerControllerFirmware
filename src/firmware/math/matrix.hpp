@@ -24,7 +24,7 @@ namespace dim {
 				}
 				// copy all elements from the initializer list to the matrix data
 				size_t i = 0;
-				for (auto it = l.begin(); it != l.end(); it++) ((T*)(this->m_data))[i++] = *it;
+				for (auto it = l.begin(); it != l.end(); it++) (reinterpret_cast<T*>(this->m_data))[i++] = *it;
 			}
 			
 			size_t cols() const { return W; }

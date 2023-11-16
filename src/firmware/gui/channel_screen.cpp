@@ -7,8 +7,8 @@ channel_screen::channel_screen(renderer &renderer, window &window, model::model 
 	: m_window(window)
 	, m_model(model)
 	, m_name(model, "tmp.dummy_string", [](){}, renderer, 10, 10, 780, 30)
-	, m_address(model, "tmp.dummy_string", renderer, 10, 50, 300, 30, 16)
-	, m_address_knob(model, "tmp.dummy_double", renderer, 60, 90, 200)
+	, m_address(model, "tmp.dummy_string", renderer, 10, 50, 300, 30, 24)
+	, m_address_knob(model, "tmp.dummy_double", renderer, 60, 90, 100)
 {
 	ftrace();
 	// setup scene

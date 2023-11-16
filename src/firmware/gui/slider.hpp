@@ -37,6 +37,8 @@ namespace dim {
 			
 			void set_value_name(const std::string &value_name);
 			
+			virtual bool focussable() override { return true; }
+			
 			virtual void draw_component(renderer &renderer) override;
 			virtual void onLeftMouseDown(float x, float y) override;
 			virtual void onLeftMouseUp(float x, float y) override;

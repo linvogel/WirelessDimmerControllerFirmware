@@ -21,6 +21,9 @@ namespace dim {
 			float m_dx;
 			float m_dy;
 			
+			dim::gui::component* m_last_hit_left_down;
+			dim::gui::component* m_last_hit_right_down;
+			
 		public:
 			input_controller();
 			input_controller(GLFWwindow *window, dim::gui::component *comp);

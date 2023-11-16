@@ -128,20 +128,36 @@ void dim::in::input_controller::mouse_button_callback(int button, int action, in
 		// mark button as pressed
 		this->m_buttons[button] = true;
 		// update focussed component
-		this->m_comp->focus(this->m_comp->hit_children(this->m_mousex, this->m_mousey));
+		component *hit_component = this->m_comp->hit_children(this->m_mousex, this->m_mousey);
+		this->m_comp->focus(hit_component);
 		vector2f offset = {0, 0};
-		for (component* c = this->m_comp->get_focussed(); c; c = c->get_parent()) offset += c->get_position();
+		for (component* c = hit_component; c; c = c->get_parent()) offset += c->get_position();
 		
 		// call event handlers
-		if (button == GLFW_MOUSE_BUTTON_LEFT) this->m_comp->get_focussed()->onLeftMouseDown(this->m_mousex - offset(0), this->m_mousey - offset(1));
-		else if (button == GLFW_MOUSE_BUTTON_RIGHT) this->m_comp->get_focussed()->onRightMouseDown(this->m_mousex - offset(0), this->m_mousey - offset(1));
+		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+			hit_component->onLeftMouseDown(this->m_mousex - offset(0), this->m_mousey - offset(1));
+			this->m_last_hit_left_down = hit_component;
+		}
+		else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+			hit_component->onRightMouseDown(this->m_mousex - offset(0), this->m_mousey - offset(1));
+			this->m_last_hit_right_down = hit_component;
+		}
 	} else if (action == GLFW_RELEASE) {
 		// mark button as unpressed
 		this->m_buttons[button] = false;
 		// call event handlers
 		vector2f offset = {0, 0};
-		for (component* c = this->m_comp->get_focussed(); c; c = c->get_parent()) offset += c->get_position();
-		if (button == GLFW_MOUSE_BUTTON_LEFT) this->m_comp->get_focussed()->onLeftMouseUp(this->m_mousex - offset(0), this->m_mousey - offset(1));
-		else if (button == GLFW_MOUSE_BUTTON_RIGHT) this->m_comp->get_focussed()->onRightMouseUp(this->m_mousex - offset(0), this->m_mousey - offset(1));
+		component *hit_component = this->m_comp->hit_children(this->m_mousex, this->m_mousey);
+		for (component* c = hit_component; c; c = c->get_parent()) offset += c->get_position();
+		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (this->m_last_hit_left_down != nullptr)
+				this->m_last_hit_left_down->onLeftMouseUp(this->m_mousex - offset(0), this->m_mousey - offset(1));
+			this->m_last_hit_left_down = nullptr;
+		}
+		else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+			if (this->m_last_hit_right_down != nullptr)
+				this->m_last_hit_right_down->onRightMouseUp(this->m_mousex - offset(0), this->m_mousey - offset(1));
+			this->m_last_hit_right_down = nullptr;
+		}
 	}
 }

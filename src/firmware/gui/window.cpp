@@ -95,6 +95,7 @@ void window::remove_child(dim::gui::component *child)
 void window::set_scene(size_t scene)
 {
 	ftrace();
+	this->m_focussed = nullptr;
 	this->m_children.clear();
 	this->m_scene = scene;
 	this->m_children.insert(this->m_children.begin(), this->m_scenes[this->m_scene].begin(), this->m_scenes[this->m_scene].end());
